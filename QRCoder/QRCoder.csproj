@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Set essential properties -->
+    <TargetFrameworks>net35;net40;netstandard1.3;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsPackable>true</IsPackable>
+
+    <!-- Set NuGet package properties -->
+    <PackageTags>c# csharp qr qrcoder qrcode qr-generator qr-code-generator</PackageTags>
+    <Description>QRCoder is a simple library, written in C#.NET, which enables you to create QR codes.</Description>
+
+    <!-- Set strong name and COM properties -->
+    <AssemblyOriginatorKeyFile>QRCoderStrongName.snk</AssemblyOriginatorKeyFile>
+    <ComVisible>true</ComVisible>
+    <Guid>e668b98b-83bb-4e60-b33c-4fd5ed9c0156</Guid>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <InternalsVisibleTo Include="QRCoderTests, PublicKey=002400000480000094000000060200000024000052534131000400000100010071e74d3f6dcbba7726fcbb7ad05a2dfa3b8e13f9bf2938c05de266a83a7f3c95201b7cdc9e1f88842093ece868c3ec7874e3b8907008763c85711bf0e2e9757a3068385380a757bd52fa77248f227f602b0785e040756ef42dabc7de7f8376847c71b3f20356a9176cc88067583ee3501e61f8aa07bdd70f41418986fb79a1a3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Release'">
+    <InternalsVisibleTo Include="QRCoderTests" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40' ">
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' OR '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1' ">
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1' OR '$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'net5.0-windows' ">
+    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net6.0-windows' ">
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>

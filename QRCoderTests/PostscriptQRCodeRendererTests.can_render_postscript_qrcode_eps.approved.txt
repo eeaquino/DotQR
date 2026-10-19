@@ -1,0 +1,81 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: QRCoder.NET
+%%Title: QRCode
+%%DocumentData: Clean7Bit
+%%BoundingBox: 0 0 165 165
+%%LanguageLevel: 2
+%%EndComments
+%%BeginProlog
+7 dict begin
+/csquare {
+    newpath
+    0 0 moveto
+    0 1 rlineto
+    1 0 rlineto
+    0 -1 rlineto
+    closepath
+    setrgbcolor
+    fill
+} def
+/f {
+    0 0 0 csquare
+    1 0 translate
+} def
+/b {
+    1 0 translate
+} def
+/background {
+    1 1 1 csquare
+} def
+/nl {
+    -33 -1 translate
+} def
+%%EndProlog
+%%BeginSetup
+/sz 165 def
+/sc 5 def
+%%EndSetup
+gsave
+0 0 moveto
+sz sz scale
+background
+grestore
+gsave
+sc sc scale
+0 33 1 sub translate
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b f f f f f f f b f b f b f b b b f b f f f f f f f b b b b nl
+b b b b f b b b b b f b b f f f f b b b b b f b b b b b f b b b b nl
+b b b b f b f f f b f b f f f b b f f b b b f b f f f b f b b b b nl
+b b b b f b f f f b f b f f f b f f f f f b f b f f f b f b b b b nl
+b b b b f b f f f b f b f b b f f b b f f b f b f f f b f b b b b nl
+b b b b f b b b b b f b b b f f b b b b f b f b b b b b f b b b b nl
+b b b b f f f f f f f b f b f b f b f b f b f f f f f f f b b b b nl
+b b b b b b b b b b b b b b f b f b b b b b b b b b b b b b b b b nl
+b b b b f f f f b b f b f b f f b b f b f f b b f f f b f b b b b nl
+b b b b f f b f f f b f f b f b f b f b b b b b b f f b b b b b b nl
+b b b b b f f f f f f b b f f f f b b b f f b f f f b b b b b b b nl
+b b b b b b b f b f b b f f f f f f b f f b b f b f f b b b b b b nl
+b b b b f b f f b f f f b f f f b f b b b f f b f b f b b b b b b nl
+b b b b b f f f b f b b b b b b b b f f f b f f f b b f f b b b b nl
+b b b b b f b b b f f f f f b b f f b b b b b f b f b f b b b b b nl
+b b b b f b f f b f b f f f f f f b f b b f f b b f b b f b b b b nl
+b b b b b b f b f f f f f f f f b f f b f f f f f b f b b b b b b nl
+b b b b b b b b b b b b f f b f b f b b f b b b f b f f b b b b b nl
+b b b b f f f f f f f b b b b b b b b b f b f b f f b f f b b b b nl
+b b b b f b b b b b f b b f f b b b f f f b b b f f b b f b b b b nl
+b b b b f b f f f b f b b b f b f b b b f f f f f b b b f b b b b nl
+b b b b f b f f f b f b f b f f f b f b b f f b f f f f f b b b b nl
+b b b b f b f f f b f b f b b f b b f b f b f b f f b f b b b b b nl
+b b b b f b b b b b f b f f f f b f f b b f b b f f f b b b b b b nl
+b b b b f f f f f f f b f b b b b f b b b f f b b b f f f b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
+b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+grestore
+end
+%%EOF
