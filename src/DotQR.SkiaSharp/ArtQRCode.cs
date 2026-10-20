@@ -1,19 +1,13 @@
-#if SYSTEM_DRAWING
+using SkiaSharp;
+using static DotQR.ArtQRCode;
+using static DotQR.QRCodeGenerator;
 
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using static QRCoder.ArtQRCode;
-using static QRCoder.QRCodeGenerator;
-
-// pull request raised to extend library used. 
-namespace QRCoder;
+// pull request raised to extend library used.
+namespace DotQR;
 
 /// <summary>
 /// Represents an art-style QR code generator that provides functionality to render QR codes with dots as modules.
 /// </summary>
-#if NET6_0_OR_GREATER
-[System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
 public class ArtQRCode : AbstractQRCode, IDisposable
 {
     /// <summary>
@@ -33,16 +27,16 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     /// </summary>
     /// <param name="pixelsPerModule">Amount of px each dark/light module of the QR code shall take place in the final QR code image</param>
     /// <returns>QRCode graphic as bitmap</returns>
-    public Bitmap GetGraphic(int pixelsPerModule)
-        => GetGraphic(pixelsPerModule, Color.Black, Color.White, Color.Transparent);
+    public SKBitmap GetGraphic(int pixelsPerModule)
+        => GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, SKColors.Transparent);
 
     /// <summary>
     /// Renders an art-style QR code with dots as modules and a background image (With default settings: DarkColor=Black, LightColor=White, Background=Transparent, QuietZone=true)
     /// </summary>
     /// <param name="backgroundImage">A bitmap object that will be used as background picture</param>
     /// <returns>QRCode graphic as bitmap</returns>
-    public Bitmap GetGraphic(Bitmap? backgroundImage = null)
-        => GetGraphic(10, Color.Black, Color.White, Color.Transparent, backgroundImage: backgroundImage);
+    public SKBitmap GetGraphic(SKBitmap? backgroundImage = null)
+        => GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, backgroundImage: backgroundImage);
 
     /// <summary>
     /// Renders an art-style QR code with dots as modules and various user settings
@@ -58,112 +52,119 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quietzone</param>
     /// <param name="finderPatternImage">Optional image that should be used instead of the default finder patterns</param>
     /// <returns>QRCode graphic as bitmap</returns>
-    public Bitmap GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, Color backgroundColor, Bitmap? backgroundImage = null, double pixelSizeFactor = 1,
-                             bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted,
-                             BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, Bitmap? finderPatternImage = null)
+    public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, SKBitmap? backgroundImage = null, double pixelSizeFactor = 1,
+                               bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted,
+                               BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, SKBitmap? finderPatternImage = null)
     {
         if (pixelSizeFactor > 1)
             throw new ArgumentOutOfRangeException(nameof(pixelSizeFactor), "The parameter pixelSizeFactor must be between 0 and 1. (0-100%)");
-        int pixelSize = (int)Math.Min(pixelsPerModule, Math.Floor(pixelsPerModule * pixelSizeFactor));
+        var pixelSize = (int)Math.Min(pixelsPerModule, Math.Floor(pixelsPerModule * pixelSizeFactor));
 
         var numModules = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8);
-        var offset = (drawQuietZones ? 0 : 4);
+        var offset = drawQuietZones ? 0 : 4;
         var size = numModules * pixelsPerModule;
 
-        var bitmap = new Bitmap(size, size);
+        var bitmap = new SKBitmap(new SKImageInfo(size, size, SKColorType.Rgba8888, SKAlphaType.Premul));
+        using var canvas = new SKCanvas(bitmap);
+        using var flatPaint = new SKPaint { IsAntialias = false };
+        using var dotPaint = new SKPaint { IsAntialias = true };
+        using var imagePaint = new SKPaint { IsAntialias = true };
 
-        using (var graphics = Graphics.FromImage(bitmap))
+        canvas.Clear(backgroundColor);
+
+        if (backgroundImage != null)
         {
-            using var lightBrush = new SolidBrush(lightColor);
-            using var darkBrush = new SolidBrush(darkColor);
-            // make background transparent
-            using (var brush = new SolidBrush(backgroundColor))
-                graphics.FillRectangle(brush, new Rectangle(0, 0, size, size));
-            //Render background if set
-            if (backgroundImage != null)
+            var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
+            if (backgroundImageStyle == BackgroundImageStyle.Fill)
             {
-                if (backgroundImageStyle == BackgroundImageStyle.Fill)
-                {
-                    using var resizedBg = Resize(backgroundImage, size);
-                    graphics.DrawImage(resizedBg, 0, 0);
-                }
-                else if (backgroundImageStyle == BackgroundImageStyle.DataAreaOnly)
-                {
-                    var bgOffset = 4 - offset;
-                    using var resizedBg = Resize(backgroundImage, size - (2 * bgOffset * pixelsPerModule));
-                    graphics.DrawImage(resizedBg, 0 + (bgOffset * pixelsPerModule), (bgOffset * pixelsPerModule));
-                }
+                canvas.DrawBitmap(backgroundImage, FitWithin(backgroundImage, SKRect.Create(0, 0, size, size)), sampling, imagePaint);
             }
-
-
-            using var darkModulePixel = MakeDotPixel(pixelsPerModule, pixelSize, darkBrush);
-            using var lightModulePixel = MakeDotPixel(pixelsPerModule, pixelSize, lightBrush);
-
-            for (var x = 0; x < numModules; x += 1)
+            else if (backgroundImageStyle == BackgroundImageStyle.DataAreaOnly)
             {
-                for (var y = 0; y < numModules; y += 1)
-                {
-                    var rectangleF = new Rectangle(x * pixelsPerModule, y * pixelsPerModule, pixelsPerModule, pixelsPerModule);
-
-                    var pixelIsDark = QrCodeData.ModuleMatrix[offset + y][offset + x];
-                    var solidBrush = pixelIsDark ? darkBrush : lightBrush;
-                    var pixelImage = pixelIsDark ? darkModulePixel : lightModulePixel;
-
-                    if (!IsPartOfFinderPattern(x, y, numModules, offset))
-                        if (drawQuietZones && quietZoneRenderingStyle == QuietZoneStyle.Flat && IsPartOfQuietZone(x, y, numModules))
-                            graphics.FillRectangle(solidBrush, rectangleF);
-                        else
-                            graphics.DrawImage(pixelImage, rectangleF);
-                    else if (finderPatternImage == null)
-                        graphics.FillRectangle(solidBrush, rectangleF);
-                }
+                var bgOffset = 4 - offset;
+                var target = size - (2 * bgOffset * pixelsPerModule);
+                var area = SKRect.Create(bgOffset * pixelsPerModule, bgOffset * pixelsPerModule, target, target);
+                canvas.DrawBitmap(backgroundImage, FitWithin(backgroundImage, area), sampling, imagePaint);
             }
-            if (finderPatternImage != null)
-            {
-                var finderPatternSize = 7 * pixelsPerModule;
-                var finderPatternOffset = drawQuietZones ? 4 * pixelsPerModule : 0;
-                graphics.DrawImage(finderPatternImage, new Rectangle(finderPatternOffset, finderPatternOffset, finderPatternSize, finderPatternSize));
-                graphics.DrawImage(finderPatternImage, new Rectangle(size - finderPatternOffset - finderPatternSize, finderPatternOffset, finderPatternSize, finderPatternSize));
-                graphics.DrawImage(finderPatternImage, new Rectangle(finderPatternOffset, size - finderPatternOffset - finderPatternSize, finderPatternSize, finderPatternSize));
-            }
-            graphics.Save();
         }
+
+        // Accumulate the dots into two paths and paint each once, rather than issuing one draw call
+        // per module.
+        using var lightBuilder = new SKPathBuilder();
+        using var darkBuilder = new SKPathBuilder();
+        var radius = pixelSize / 2f;
+        var centre = pixelsPerModule / 2f;
+
+        for (var x = 0; x < numModules; x++)
+        {
+            for (var y = 0; y < numModules; y++)
+            {
+                var rectangle = SKRect.Create(x * pixelsPerModule, y * pixelsPerModule, pixelsPerModule, pixelsPerModule);
+                var pixelIsDark = QrCodeData.ModuleMatrix[offset + y][offset + x];
+
+                if (!IsPartOfFinderPattern(x, y, numModules, offset))
+                {
+                    if (drawQuietZones && quietZoneRenderingStyle == QuietZoneStyle.Flat && IsPartOfQuietZone(x, y, numModules))
+                    {
+                        flatPaint.Color = pixelIsDark ? darkColor : lightColor;
+                        canvas.DrawRect(rectangle, flatPaint);
+                    }
+                    else if (pixelSize > 0)
+                    {
+                        var builder = pixelIsDark ? darkBuilder : lightBuilder;
+                        builder.AddCircle(x * pixelsPerModule + centre, y * pixelsPerModule + centre, radius, SKPathDirection.Clockwise);
+                    }
+                }
+                else if (finderPatternImage == null)
+                {
+                    flatPaint.Color = pixelIsDark ? darkColor : lightColor;
+                    canvas.DrawRect(rectangle, flatPaint);
+                }
+            }
+        }
+
+        using (var lightPath = lightBuilder.Detach())
+        {
+            dotPaint.Color = lightColor;
+            canvas.DrawPath(lightPath, dotPaint);
+        }
+
+        using (var darkPath = darkBuilder.Detach())
+        {
+            dotPaint.Color = darkColor;
+            canvas.DrawPath(darkPath, dotPaint);
+        }
+
+        if (finderPatternImage != null)
+        {
+            var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
+            var finderPatternSize = 7 * pixelsPerModule;
+            var finderPatternOffset = drawQuietZones ? 4 * pixelsPerModule : 0;
+            canvas.DrawBitmap(finderPatternImage, SKRect.Create(finderPatternOffset, finderPatternOffset, finderPatternSize, finderPatternSize), sampling, imagePaint);
+            canvas.DrawBitmap(finderPatternImage, SKRect.Create(size - finderPatternOffset - finderPatternSize, finderPatternOffset, finderPatternSize, finderPatternSize), sampling, imagePaint);
+            canvas.DrawBitmap(finderPatternImage, SKRect.Create(finderPatternOffset, size - finderPatternOffset - finderPatternSize, finderPatternSize, finderPatternSize), sampling, imagePaint);
+        }
+
         return bitmap;
     }
 
     /// <summary>
-    /// If the pixelSize is bigger than the pixelsPerModule or may end up filling the Module making a traditional QR code.
+    /// Centres an image inside a square area, preserving its aspect ratio.
     /// </summary>
-    /// <param name="pixelsPerModule">Pixels used per module rendered</param>
-    /// <param name="pixelSize">Size of the dots</param>
-    /// <param name="brush">Color of the pixels</param>
-    /// <returns></returns>
-    private static Bitmap MakeDotPixel(int pixelsPerModule, int pixelSize, SolidBrush brush)
+    /// <param name="image">The image to place.</param>
+    /// <param name="area">The square area to place it in.</param>
+    /// <returns>The destination rectangle for the draw call.</returns>
+    private static SKRect FitWithin(SKBitmap image, SKRect area)
     {
-        // draw a dot
-        using var bitmap = new Bitmap(pixelSize, pixelSize);
-        using (var graphics = Graphics.FromImage(bitmap))
-        {
-            graphics.FillEllipse(brush, new Rectangle(0, 0, pixelSize, pixelSize));
-            graphics.Save();
-        }
-
-        var pixelWidth = Math.Min(pixelsPerModule, pixelSize);
-        var margin = Math.Max((pixelsPerModule - pixelWidth) / 2, 0);
-
-        // center the dot in the module and crop to stay the right size.
-        var cropped = new Bitmap(pixelsPerModule, pixelsPerModule);
-        using (var graphics = Graphics.FromImage(cropped))
-        {
-            graphics.DrawImage(bitmap, new Rectangle(margin, margin, pixelWidth, pixelWidth),
-                new RectangleF(((float)pixelSize - pixelWidth) / 2, ((float)pixelSize - pixelWidth) / 2, pixelWidth, pixelWidth),
-                GraphicsUnit.Pixel);
-            graphics.Save();
-        }
-
-        return cropped;
+        var scale = Math.Min(area.Width / image.Width, area.Height / image.Height);
+        var width = image.Width * scale;
+        var height = image.Height * scale;
+        return SKRect.Create(
+            area.Left + (area.Width - width) / 2f,
+            area.Top + (area.Height - height) / 2f,
+            width,
+            height);
     }
-
 
     /// <summary>
     /// Checks if a given module(-position) is part of the quietzone of a QR code
@@ -175,12 +176,11 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     private static bool IsPartOfQuietZone(int x, int y, int numModules)
     {
         return
-            x < 4 || //left 
+            x < 4 || //left
             y < 4 || //top
             x > numModules - 5 || //right
-            y > numModules - 5; //bottom                
+            y > numModules - 5; //bottom
     }
-
 
     /// <summary>
     /// Checks if a given module(-position) is part of one of the three finder patterns of a QR code
@@ -200,38 +200,6 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             (x >= invertedOffset && x < cornerSize && y >= invertedOffset && y < cornerSize) || //Top-left finder pattern
             (x > outerLimitLow && x < outerLimitHigh && y >= invertedOffset && y < cornerSize) || //Top-right finder pattern
             (x >= invertedOffset && x < cornerSize && y > outerLimitLow && y < outerLimitHigh); //Bottom-left finder pattern
-    }
-
-    /// <summary>
-    /// Resize to a square bitmap, but maintain the aspect ratio by padding transparently.
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="newSize"></param>
-    /// <returns>Resized image as bitmap</returns>
-    private static Bitmap Resize(Bitmap image, int newSize)
-    {
-        float scale = Math.Min((float)newSize / image.Width, (float)newSize / image.Height);
-        var scaledWidth = (int)(image.Width * scale);
-        var scaledHeight = (int)(image.Height * scale);
-        var offsetX = (newSize - scaledWidth) / 2;
-        var offsetY = (newSize - scaledHeight) / 2;
-
-        using var scaledImage = new Bitmap(image, new Size(scaledWidth, scaledHeight));
-
-        var bm = new Bitmap(newSize, newSize);
-
-        using (var graphics = Graphics.FromImage(bm))
-        {
-            using var brush = new SolidBrush(Color.Transparent);
-            graphics.FillRectangle(brush, new Rectangle(0, 0, newSize, newSize));
-
-            graphics.InterpolationMode = InterpolationMode.High;
-            graphics.CompositingQuality = CompositingQuality.HighQuality;
-            graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-            graphics.DrawImage(scaledImage, new Rectangle(offsetX, offsetY, scaledWidth, scaledHeight));
-        }
-        return bm;
     }
 
     /// <summary>
@@ -270,9 +238,6 @@ public class ArtQRCode : AbstractQRCode, IDisposable
 /// <summary>
 /// Provides static methods for creating art-style QR codes.
 /// </summary>
-#if NET6_0_OR_GREATER
-[System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
 public static class ArtQRCodeHelper
 {
     /// <summary>
@@ -295,10 +260,10 @@ public static class ArtQRCodeHelper
     /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quietzone</param>
     /// <param name="finderPatternImage">Optional image that should be used instead of the default finder patterns</param>
     /// <returns>QRCode graphic as bitmap</returns>
-    public static Bitmap GetQRCode(string plainText, int pixelsPerModule, Color darkColor, Color lightColor, Color backgroundColor, ECCLevel eccLevel, bool forceUtf8 = false,
-                                   bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1, Bitmap? backgroundImage = null, double pixelSizeFactor = 1.0,
-                                   bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Flat,
-                                   BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, Bitmap? finderPatternImage = null)
+    public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, ECCLevel eccLevel, bool forceUtf8 = false,
+                                     bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1, SKBitmap? backgroundImage = null, double pixelSizeFactor = 1.0,
+                                     bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Flat,
+                                     BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, SKBitmap? finderPatternImage = null)
     {
         using var qrGenerator = new QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
@@ -306,5 +271,3 @@ public static class ArtQRCodeHelper
         return qrCode.GetGraphic(pixelsPerModule, darkColor, lightColor, backgroundColor, backgroundImage, pixelSizeFactor, drawQuietZones, quietZoneRenderingStyle, backgroundImageStyle, finderPatternImage);
     }
 }
-
-#endif
