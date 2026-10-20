@@ -100,11 +100,33 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="forceUtf8">Shall the generator be forced to work in UTF-8 mode?</param>
     /// <param name="utf8BOM">Should the byte-order-mark be used?</param>
     /// <param name="eciMode">Which ECI mode shall be used?</param>
-    /// <param name="requestedVersion">Set fixed QR code target version.</param>
+    /// <param name="requestedVersion">Set fixed QR code target version, from -1 (automatic) to 40.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="requestedVersion"/> is not -1 or 1-40.</exception>
     /// <exception cref="DotQR.Exceptions.DataTooLongException">Thrown when the payload is too big to be encoded in a QR code.</exception>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
     public static QRCodeData GenerateQrCode(string plainText, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1)
     {
+        switch (requestedVersion)
+        {
+            case -1:
+                break;
+            case >= 1 and <= 40:
+                break;
+            case < 0:
+                // Negative values other than -1 name Micro QR versions, which this method cannot
+                // produce. Without this guard, version selection reports an unrelated capacity or
+                // dictionary error from deep inside the Micro capacity tables.
+                throw new ArgumentOutOfRangeException(
+                    nameof(requestedVersion),
+                    requestedVersion,
+                    "Only -1 (automatic) and 1-40 are valid standard QR code versions. Use GenerateMicroQrCode for Micro QR codes.");
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(requestedVersion),
+                    requestedVersion,
+                    "Only -1 (automatic) and 1-40 are valid standard QR code versions.");
+        }
+
         eccLevel = ValidateECCLevel(eccLevel);
         // Create data segment from plain text
         var segment = CreateDataSegment(plainText, forceUtf8, utf8BOM, eciMode);
