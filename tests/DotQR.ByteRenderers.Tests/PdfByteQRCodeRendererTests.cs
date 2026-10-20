@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace QRCoderTests;
+namespace DotQRTests.ByteRenderers;
 
 public class PdfByteQRCodeRendererTests
 {

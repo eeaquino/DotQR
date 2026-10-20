@@ -1,12 +1,22 @@
-%!PS-Adobe-3.0 EPSF-3.0
-%%Creator: QRCoder.NET
+%!PS-Adobe-3.0
+%%Creator: DotQR.NET
 %%Title: QRCode
 %%DocumentData: Clean7Bit
+%%Origin: 0
+%%DocumentMedia: Default 165 165 0 () ()
 %%BoundingBox: 0 0 165 165
 %%LanguageLevel: 2
+%%Pages: 1
+%%Page: 1 1
 %%EndComments
-%%BeginProlog
-7 dict begin
+%%BeginConstants
+/sz 165 def
+/sc 5 def
+%%EndConstants
+%%BeginFeature: *PageSize Default
+<< /PageSize [ sz sz ] /ImagingBBox null >> setpagedevice
+%%EndFeature
+%%BeginFunctions
 /csquare {
     newpath
     0 0 moveto
@@ -18,25 +28,22 @@
     fill
 } def
 /f {
-    0 0 0 csquare
+    1 0 0 csquare
     1 0 translate
 } def
 /b {
     1 0 translate
 } def
 /background {
-    1 1 1 csquare
+    0 0 1 csquare
 } def
 /nl {
     -33 -1 translate
 } def
-%%EndProlog
-%%BeginSetup
-/sz 165 def
-/sc 5 def
-%%EndSetup
-gsave
+%%EndFunctions
+%%BeginBody
 0 0 moveto
+gsave
 sz sz scale
 background
 grestore
@@ -76,6 +83,7 @@ b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
 b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
 b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b nl
 b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+%%EndBody
 grestore
-end
+showpage
 %%EOF

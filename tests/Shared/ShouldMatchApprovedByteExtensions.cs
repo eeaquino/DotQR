@@ -6,11 +6,11 @@ using System.Runtime.CompilerServices;
 namespace Shouldly;
 
 /// <summary>
-/// Binary approval support for tests that do not need to decode or re-encode an image.
-/// Compares the produced bytes against an approved file next to the test source file.
+/// Binary and text approval support for tests that do not need to decode or re-encode an artifact.
+/// Compares the produced content against an approved file next to the test source file.
 /// </summary>
 /// <remarks>
-/// Unlike Shouldly's built-in string approvals, this overload never auto-approves: a missing or
+/// Unlike Shouldly's built-in string approvals, these overloads never auto-approve: a missing or
 /// differing baseline always fails, so a regression cannot silently rewrite its own expectation.
 /// </remarks>
 [ShouldlyMethods]
@@ -29,6 +29,98 @@ public static class ShouldMatchApprovedByteExtensions
     {
         ArgumentNullException.ThrowIfNull(actual);
 
+        var (approvedFile, receivedFile) = ResolvePaths(fileExtension, discriminator);
+        File.WriteAllBytes(receivedFile, actual);
+
+        if (!File.Exists(approvedFile))
+            throw MissingApproval(approvedFile, receivedFile);
+
+        var approved = File.ReadAllBytes(approvedFile);
+        var received = File.ReadAllBytes(receivedFile);
+
+        if (!approved.AsSpan().SequenceEqual(received.AsSpan()))
+        {
+            var baseMessage = $"Binary files do not match. Expected length: {approved.Length}, Actual length: {received.Length}";
+            throw Mismatch(baseMessage, approvedFile, receivedFile, customMessage);
+        }
+
+        File.Delete(receivedFile);
+    }
+
+    /// <summary>
+    /// Asserts that the produced text matches the approved file for the calling test method,
+    /// treating CRLF and LF as equivalent.
+    /// </summary>
+    /// <remarks>
+    /// Some formats legitimately carry platform-dependent line terminators — PostScript embeds the
+    /// line endings of the source file inside raw string literals, and git may rewrite them on
+    /// checkout. Comparing with line endings normalized keeps that out of the assertion while
+    /// still catching any real content change.
+    /// </remarks>
+    /// <param name="actual">The produced text.</param>
+    /// <param name="fileExtension">Extension of the approved file, without a leading dot.</param>
+    /// <param name="discriminator">Optional discriminator appended to the file name.</param>
+    /// <param name="customMessage">Optional message prepended to a failure.</param>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ShouldMatchApprovedText(this string actual, string fileExtension, string? discriminator = null, string? customMessage = null)
+    {
+        ArgumentNullException.ThrowIfNull(actual);
+
+        var (approvedFile, receivedFile) = ResolvePaths(fileExtension, discriminator);
+        var normalized = NormalizeNewlines(actual);
+        File.WriteAllText(receivedFile, normalized);
+
+        if (!File.Exists(approvedFile))
+            throw MissingApproval(approvedFile, receivedFile);
+
+        var approved = NormalizeNewlines(File.ReadAllText(approvedFile));
+
+        if (!string.Equals(approved, normalized, StringComparison.Ordinal))
+        {
+            var index = FirstDifference(approved, normalized);
+            var baseMessage = $"Text files do not match. Expected length: {approved.Length}, Actual length: {normalized.Length}, first difference at index {index}.";
+            throw Mismatch(baseMessage, approvedFile, receivedFile, customMessage);
+        }
+
+        File.Delete(receivedFile);
+    }
+
+    private static string NormalizeNewlines(string value) => value.Replace("\r\n", "\n").Replace("\r", "\n");
+
+    private static int FirstDifference(string left, string right)
+    {
+        var limit = Math.Min(left.Length, right.Length);
+        for (var i = 0; i < limit; i++)
+        {
+            if (left[i] != right[i])
+                return i;
+        }
+        return limit;
+    }
+
+    private static ShouldAssertException MissingApproval(string approvedFile, string receivedFile) =>
+        new($"""
+            Approval file {approvedFile}
+                does not exist
+
+            To approve the received file, run:
+
+            copy /Y "{receivedFile}" "{approvedFile}"
+
+            """);
+
+    private static ShouldAssertException Mismatch(string baseMessage, string approvedFile, string receivedFile, string? customMessage) =>
+        new((customMessage is null ? baseMessage : $"{customMessage}\n\n{baseMessage}") + $"""
+
+
+            To approve the received file, run:
+
+            copy /Y "{receivedFile}" "{approvedFile}"
+
+            """);
+
+    private static (string ApprovedFile, string ReceivedFile) ResolvePaths(string fileExtension, string? discriminator)
+    {
         var stackTrace = new StackTrace(true);
 
         // Find the first frame that is NOT in a class marked with [ShouldlyMethods].
@@ -67,48 +159,8 @@ public static class ShouldMatchApprovedByteExtensions
         var testMethodName = method.Name;
         var discriminatorPart = string.IsNullOrEmpty(discriminator) ? "" : $".{discriminator}";
 
-        var approvedFile = Path.Combine(outputFolder, $"{className}.{testMethodName}{discriminatorPart}.approved.{fileExtension}");
-        var receivedFile = Path.Combine(outputFolder, $"{className}.{testMethodName}{discriminatorPart}.received.{fileExtension}");
-
-        File.WriteAllBytes(receivedFile, actual);
-
-        if (!File.Exists(approvedFile))
-        {
-            throw new ShouldAssertException($"""
-                Approval file {approvedFile}
-                    does not exist
-
-                To approve the received file, run:
-
-                copy /Y "{receivedFile}" "{approvedFile}"
-
-                """);
-        }
-
-        var approvedFileContents = File.ReadAllBytes(approvedFile);
-        var receivedFileContents = File.ReadAllBytes(receivedFile);
-
-        var contentsMatch = approvedFileContents.AsSpan().SequenceEqual(receivedFileContents.AsSpan());
-
-        if (!contentsMatch)
-        {
-            var baseMessage = $"Binary files do not match. Expected length: {approvedFileContents.Length}, Actual length: {receivedFileContents.Length}";
-            var copyCommand = $"""
-
-
-                To approve the received file, run:
-
-                copy /Y "{receivedFile}" "{approvedFile}"
-
-                """;
-
-            var message = customMessage != null
-                ? $"{customMessage}\n\n{baseMessage}{copyCommand}"
-                : $"{baseMessage}{copyCommand}";
-
-            throw new ShouldAssertException(message);
-        }
-
-        File.Delete(receivedFile);
+        return (
+            Path.Combine(outputFolder, $"{className}.{testMethodName}{discriminatorPart}.approved.{fileExtension}"),
+            Path.Combine(outputFolder, $"{className}.{testMethodName}{discriminatorPart}.received.{fileExtension}"));
     }
 }

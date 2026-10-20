@@ -1,4 +1,4 @@
-namespace QRCoderTests;
+namespace DotQRTests.ByteRenderers;
 
 public class PostscriptQRCodeRendererTests
 {
@@ -9,7 +9,7 @@ public class PostscriptQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
         var ps = new PostscriptQRCode(data).GetGraphic(5);
-        ps.ShouldMatchApproved(x => x.NoDiff());
+        ps.ShouldMatchApprovedText("txt");
     }
 
     [Fact]
@@ -19,7 +19,7 @@ public class PostscriptQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
         var ps = new PostscriptQRCode(data).GetGraphic(5, true);
-        ps.ShouldMatchApproved(x => x.NoDiff());
+        ps.ShouldMatchApprovedText("txt");
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public class PostscriptQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
         var ps = new PostscriptQRCode(data).GetGraphic(new Size(33, 33));
-        ps.ShouldMatchApproved(x => x.NoDiff());
+        ps.ShouldMatchApprovedText("txt");
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class PostscriptQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
         var ps = new PostscriptQRCode(data).GetGraphic(new Size(50, 50), false);
-        ps.ShouldMatchApproved(x => x.NoDiff());
+        ps.ShouldMatchApprovedText("txt");
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class PostscriptQRCodeRendererTests
         //Create QR code
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
-        var ps = new PostscriptQRCode(data).GetGraphic(5, Color.Red, Color.Blue);
-        ps.ShouldMatchApproved(x => x.NoDiff());
+        var ps = new PostscriptQRCode(data).GetGraphic(5, RgbaColor.Parse("red"), RgbaColor.Parse("blue"));
+        ps.ShouldMatchApprovedText("txt");
     }
 }

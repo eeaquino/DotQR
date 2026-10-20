@@ -1,4 +1,4 @@
-namespace QRCoderTests;
+namespace DotQRTests.ByteRenderers;
 
 public class BitmapByteQRCodeRendererTests
 {
@@ -8,7 +8,7 @@ public class BitmapByteQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
         var bmp = new BitmapByteQRCode(data).GetGraphic(10);
-        bmp.ShouldMatchApprovedImage();
+        bmp.ShouldMatchApproved("bmp");
     }
 
 
@@ -18,7 +18,7 @@ public class BitmapByteQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
         var bmp = new BitmapByteQRCode(data).GetGraphic(10, new byte[] { 30, 30, 30 }, new byte[] { 255, 0, 0 });
-        bmp.ShouldMatchApprovedImage();
+        bmp.ShouldMatchApproved("bmp");
     }
 
     [Fact]
@@ -27,6 +27,6 @@ public class BitmapByteQRCodeRendererTests
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
         var bmp = new BitmapByteQRCode(data).GetGraphic(10, "#e3e3e3", "#ffffff");
-        bmp.ShouldMatchApprovedImage();
+        bmp.ShouldMatchApproved("bmp");
     }
 }

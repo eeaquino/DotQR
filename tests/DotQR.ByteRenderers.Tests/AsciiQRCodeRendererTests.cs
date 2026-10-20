@@ -1,4 +1,4 @@
-namespace QRCoderTests;
+namespace DotQRTests.ByteRenderers;
 
 public class AsciiQRCodeRendererTests
 {

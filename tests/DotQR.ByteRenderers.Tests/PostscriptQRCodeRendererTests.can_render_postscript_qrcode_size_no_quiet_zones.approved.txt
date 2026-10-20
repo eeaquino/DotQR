@@ -1,5 +1,5 @@
 %!PS-Adobe-3.0
-%%Creator: QRCoder.NET
+%%Creator: DotQR.NET
 %%Title: QRCode
 %%DocumentData: Clean7Bit
 %%Origin: 0

@@ -1,17 +1,17 @@
 %!PS-Adobe-3.0
-%%Creator: QRCoder.NET
+%%Creator: DotQR.NET
 %%Title: QRCode
 %%DocumentData: Clean7Bit
 %%Origin: 0
-%%DocumentMedia: Default 165 165 0 () ()
-%%BoundingBox: 0 0 165 165
+%%DocumentMedia: Default 33 33 0 () ()
+%%BoundingBox: 0 0 33 33
 %%LanguageLevel: 2
 %%Pages: 1
 %%Page: 1 1
 %%EndComments
 %%BeginConstants
-/sz 165 def
-/sc 5 def
+/sz 33 def
+/sc 1 def
 %%EndConstants
 %%BeginFeature: *PageSize Default
 << /PageSize [ sz sz ] /ImagingBBox null >> setpagedevice
