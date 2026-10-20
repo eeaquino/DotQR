@@ -1,0 +1,89 @@
+ASSEMBLY DotQR.ByteRenderers
+
+TYPE DotQR.AsciiQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 repeatPerModule, System.String darkColorString = "██", System.String whiteSpaceString = "  ", System.Boolean drawQuietZones = true, System.String endOfLine = "\n") : System.String
+  METHOD GetGraphicSmall(System.Boolean drawQuietZones = true, System.Boolean invert = false, System.String endOfLine = "\n") : System.String
+  METHOD GetLineByLineGraphic(System.Int32 repeatPerModule, System.String darkColorString = "██", System.String whiteSpaceString = "  ", System.Boolean drawQuietZones = true) : System.String[]
+
+TYPE DotQR.AsciiQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.String endOfLine = "\n", System.Boolean drawQuietZones = true, System.Boolean invert = true) : System.String
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.String darkColorString, System.String whiteSpaceString, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.String endOfLine = "\n", System.Boolean drawQuietZones = true) : System.String
+
+TYPE DotQR.BitmapByteQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : System.Byte[]
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.Byte[] darkColorRgb, System.Byte[] lightColorRgb) : System.Byte[]
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex) : System.Byte[]
+
+TYPE DotQR.BitmapByteQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1) : System.Byte[]
+  METHOD static GetQRCode(System.String txt, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Int32 size) : System.Byte[]
+
+TYPE DotQR.PdfByteQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : System.Byte[]
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, System.Int32 dpi = 150, System.Int64 jpgQuality = 85) : System.Byte[]
+
+TYPE DotQR.PdfByteQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1) : System.Byte[]
+  METHOD static GetQRCode(System.String txt, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Int32 size) : System.Byte[]
+
+TYPE DotQR.PngByteQRCode [sealed class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 pixelsPerModule, DotQR.RgbaColor darkColor, DotQR.RgbaColor lightColor, System.Boolean drawQuietZones = true) : System.Byte[]
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.Boolean drawQuietZones = true) : System.Byte[]
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.Byte[] darkColorRgba, System.Byte[] lightColorRgba, System.Boolean drawQuietZones = true) : System.Byte[]
+
+TYPE DotQR.PngByteQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.Byte[] darkColorRgba, System.Byte[] lightColorRgba, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.Boolean drawQuietZones = true) : System.Byte[]
+  METHOD static GetQRCode(System.String txt, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Int32 size, System.Boolean drawQuietZones = true) : System.Byte[]
+
+TYPE DotQR.PostscriptQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(DotQR.Size viewBox, DotQR.RgbaColor darkColor, DotQR.RgbaColor lightColor, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+  METHOD GetGraphic(DotQR.Size viewBox, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+  METHOD GetGraphic(DotQR.Size viewBox, System.String darkColorHex, System.String lightColorHex, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+  METHOD GetGraphic(System.Int32 pointsPerModule, DotQR.RgbaColor darkColor, DotQR.RgbaColor lightColor, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+  METHOD GetGraphic(System.Int32 pointsPerModule, System.Boolean epsFormat = false) : System.String
+  METHOD GetGraphic(System.Int32 pointsPerModule, System.String darkColorHex, System.String lightColorHex, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+
+TYPE DotQR.PostscriptQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pointsPerModule, System.String darkColorHex, System.String lightColorHex, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.Boolean drawQuietZones = true, System.Boolean epsFormat = false) : System.String
+
+TYPE DotQR.SvgQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic() : System.String
+  METHOD GetGraphic(DotQR.Size viewBox, DotQR.RgbaColor darkColor, DotQR.RgbaColor lightColor, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String
+  METHOD GetGraphic(DotQR.Size viewBox, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String
+  METHOD GetGraphic(DotQR.Size viewBox, System.String darkColorHex, System.String lightColorHex, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule, DotQR.RgbaColor darkColor, DotQR.RgbaColor lightColor, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHex, System.String lightColorHex, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String
+
+TYPE DotQR.SvgQRCode+SizingMode [enum] : System.Enum
+  FIELD static ViewBoxAttribute : DotQR.SvgQRCode+SizingMode = 1
+  FIELD static WidthHeightAttribute : DotQR.SvgQRCode+SizingMode = 0
+
+TYPE DotQR.SvgQRCode+SvgLogo [class]
+  CTOR (System.Byte[] iconRasterized, System.Int32 iconSizePercent = 15, System.Boolean fillLogoBackground = true)
+  CTOR (System.String iconVectorized, System.Int32 iconSizePercent = 15, System.Boolean fillLogoBackground = true, System.Boolean iconEmbedded = true)
+  METHOD FillLogoBackground() : System.Boolean
+  METHOD GetDataUri() : System.String
+  METHOD GetIconSizePercent() : System.Int32
+  METHOD GetMediaType() : DotQR.SvgQRCode+SvgLogo+MediaType
+  METHOD GetRawLogo() : System.Object
+  METHOD IsEmbedded() : System.Boolean
+
+TYPE DotQR.SvgQRCode+SvgLogo+MediaType [enum] : System.Enum
+  FIELD static PNG : DotQR.SvgQRCode+SvgLogo+MediaType = 0
+  FIELD static SVG : DotQR.SvgQRCode+SvgLogo+MediaType = 1
+
+TYPE DotQR.SvgQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.String darkColorHex, System.String lightColorHex, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.Boolean drawQuietZones = true, DotQR.SvgQRCode+SizingMode sizingMode = WidthHeightAttribute, DotQR.SvgQRCode+SvgLogo logo = null) : System.String

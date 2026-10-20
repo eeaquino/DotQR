@@ -1,0 +1,692 @@
+ASSEMBLY DotQR.Core
+
+TYPE DotQR.AbstractQRCode [abstract class]
+  METHOD Dispose() : System.Void
+  METHOD SetQRCodeData(DotQR.QRCodeData data) : System.Void
+
+TYPE DotQR.Exceptions.DataTooLongException [class] : System.Exception
+  CTOR (System.String eccLevel, System.String encodingMode, System.Int32 maxSizeByte)
+  CTOR (System.String eccLevel, System.String encodingMode, System.Int32 version, System.Int32 maxSizeByte)
+
+TYPE DotQR.Extensions.CustomExtensions [static class]
+  METHOD static GetStringValue(System.Enum value) : System.String
+
+TYPE DotQR.Extensions.StringValueAttribute [class] : System.Attribute
+  CTOR (System.String value)
+  PROPERTY StringValue : System.String (get)
+
+TYPE DotQR.PayloadGenerator [static class]
+  METHOD static ChecksumMod10(System.String digits) : System.Boolean
+
+TYPE DotQR.PayloadGenerator+BezahlCode [class] : DotQR.PayloadGenerator+Payload
+  CTOR (DotQR.PayloadGenerator+BezahlCode+AuthorityType authority, System.String name, System.String account = "", System.String bnc = "", System.String iban = "", System.String bic = "", System.String reason = "")
+  CTOR (DotQR.PayloadGenerator+BezahlCode+AuthorityType authority, System.String name, System.String account, System.String bnc, System.Decimal amount, System.String periodicTimeunit = "", System.Int32 periodicTimeunitRotation = 0, Nullable<System.DateTime> periodicFirstExecutionDate = null, Nullable<System.DateTime> periodicLastExecutionDate = null, System.String reason = "", System.Int32 postingKey = 0, DotQR.PayloadGenerator+BezahlCode+Currency currency = EUR, Nullable<System.DateTime> executionDate = null)
+  CTOR (DotQR.PayloadGenerator+BezahlCode+AuthorityType authority, System.String name, System.String account, System.String bnc, System.String iban, System.String bic, System.Decimal amount, System.String periodicTimeunit = "", System.Int32 periodicTimeunitRotation = 0, Nullable<System.DateTime> periodicFirstExecutionDate = null, Nullable<System.DateTime> periodicLastExecutionDate = null, System.String creditorId = "", System.String mandateId = "", Nullable<System.DateTime> dateOfSignature = null, System.String reason = "", System.Int32 postingKey = 0, System.String sepaReference = "", DotQR.PayloadGenerator+BezahlCode+Currency currency = EUR, Nullable<System.DateTime> executionDate = null, System.Int32 internalMode = 0)
+  CTOR (DotQR.PayloadGenerator+BezahlCode+AuthorityType authority, System.String name, System.String iban, System.String bic, System.Decimal amount, System.String periodicTimeunit = "", System.Int32 periodicTimeunitRotation = 0, Nullable<System.DateTime> periodicFirstExecutionDate = null, Nullable<System.DateTime> periodicLastExecutionDate = null, System.String creditorId = "", System.String mandateId = "", Nullable<System.DateTime> dateOfSignature = null, System.String reason = "", System.String sepaReference = "", DotQR.PayloadGenerator+BezahlCode+Currency currency = EUR, Nullable<System.DateTime> executionDate = null)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+BezahlCode+AuthorityType [enum] : System.Enum
+  FIELD static contact : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 6
+  FIELD static contact_v2 : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 7
+  FIELD static periodicsinglepayment : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 4
+  FIELD static periodicsinglepaymentsepa : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 5
+  FIELD static singledirectdebit : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 2
+  FIELD static singledirectdebitsepa : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 3
+  FIELD static singlepayment : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 0
+  FIELD static singlepaymentsepa : DotQR.PayloadGenerator+BezahlCode+AuthorityType = 1
+
+TYPE DotQR.PayloadGenerator+BezahlCode+BezahlCodeException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+BezahlCode+Currency [enum] : System.Enum
+  FIELD static AED : DotQR.PayloadGenerator+BezahlCode+Currency = 784
+  FIELD static AFN : DotQR.PayloadGenerator+BezahlCode+Currency = 971
+  FIELD static ALL : DotQR.PayloadGenerator+BezahlCode+Currency = 8
+  FIELD static AMD : DotQR.PayloadGenerator+BezahlCode+Currency = 51
+  FIELD static ANG : DotQR.PayloadGenerator+BezahlCode+Currency = 532
+  FIELD static AOA : DotQR.PayloadGenerator+BezahlCode+Currency = 973
+  FIELD static ARS : DotQR.PayloadGenerator+BezahlCode+Currency = 32
+  FIELD static AUD : DotQR.PayloadGenerator+BezahlCode+Currency = 36
+  FIELD static AWG : DotQR.PayloadGenerator+BezahlCode+Currency = 533
+  FIELD static AZN : DotQR.PayloadGenerator+BezahlCode+Currency = 944
+  FIELD static BAM : DotQR.PayloadGenerator+BezahlCode+Currency = 977
+  FIELD static BBD : DotQR.PayloadGenerator+BezahlCode+Currency = 52
+  FIELD static BDT : DotQR.PayloadGenerator+BezahlCode+Currency = 50
+  FIELD static BGN : DotQR.PayloadGenerator+BezahlCode+Currency = 975
+  FIELD static BHD : DotQR.PayloadGenerator+BezahlCode+Currency = 48
+  FIELD static BIF : DotQR.PayloadGenerator+BezahlCode+Currency = 108
+  FIELD static BMD : DotQR.PayloadGenerator+BezahlCode+Currency = 60
+  FIELD static BND : DotQR.PayloadGenerator+BezahlCode+Currency = 96
+  FIELD static BOB : DotQR.PayloadGenerator+BezahlCode+Currency = 68
+  FIELD static BOV : DotQR.PayloadGenerator+BezahlCode+Currency = 984
+  FIELD static BRL : DotQR.PayloadGenerator+BezahlCode+Currency = 986
+  FIELD static BSD : DotQR.PayloadGenerator+BezahlCode+Currency = 44
+  FIELD static BTN : DotQR.PayloadGenerator+BezahlCode+Currency = 64
+  FIELD static BWP : DotQR.PayloadGenerator+BezahlCode+Currency = 72
+  FIELD static BYR : DotQR.PayloadGenerator+BezahlCode+Currency = 974
+  FIELD static BZD : DotQR.PayloadGenerator+BezahlCode+Currency = 84
+  FIELD static CAD : DotQR.PayloadGenerator+BezahlCode+Currency = 124
+  FIELD static CDF : DotQR.PayloadGenerator+BezahlCode+Currency = 976
+  FIELD static CHE : DotQR.PayloadGenerator+BezahlCode+Currency = 947
+  FIELD static CHF : DotQR.PayloadGenerator+BezahlCode+Currency = 756
+  FIELD static CHW : DotQR.PayloadGenerator+BezahlCode+Currency = 948
+  FIELD static CLF : DotQR.PayloadGenerator+BezahlCode+Currency = 990
+  FIELD static CLP : DotQR.PayloadGenerator+BezahlCode+Currency = 152
+  FIELD static CNY : DotQR.PayloadGenerator+BezahlCode+Currency = 156
+  FIELD static COP : DotQR.PayloadGenerator+BezahlCode+Currency = 170
+  FIELD static COU : DotQR.PayloadGenerator+BezahlCode+Currency = 970
+  FIELD static CRC : DotQR.PayloadGenerator+BezahlCode+Currency = 188
+  FIELD static CUC : DotQR.PayloadGenerator+BezahlCode+Currency = 931
+  FIELD static CUP : DotQR.PayloadGenerator+BezahlCode+Currency = 192
+  FIELD static CVE : DotQR.PayloadGenerator+BezahlCode+Currency = 132
+  FIELD static CZK : DotQR.PayloadGenerator+BezahlCode+Currency = 203
+  FIELD static DJF : DotQR.PayloadGenerator+BezahlCode+Currency = 262
+  FIELD static DKK : DotQR.PayloadGenerator+BezahlCode+Currency = 208
+  FIELD static DOP : DotQR.PayloadGenerator+BezahlCode+Currency = 214
+  FIELD static DZD : DotQR.PayloadGenerator+BezahlCode+Currency = 12
+  FIELD static EGP : DotQR.PayloadGenerator+BezahlCode+Currency = 818
+  FIELD static ERN : DotQR.PayloadGenerator+BezahlCode+Currency = 232
+  FIELD static ETB : DotQR.PayloadGenerator+BezahlCode+Currency = 230
+  FIELD static EUR : DotQR.PayloadGenerator+BezahlCode+Currency = 978
+  FIELD static FJD : DotQR.PayloadGenerator+BezahlCode+Currency = 242
+  FIELD static FKP : DotQR.PayloadGenerator+BezahlCode+Currency = 238
+  FIELD static GBP : DotQR.PayloadGenerator+BezahlCode+Currency = 826
+  FIELD static GEL : DotQR.PayloadGenerator+BezahlCode+Currency = 981
+  FIELD static GHS : DotQR.PayloadGenerator+BezahlCode+Currency = 936
+  FIELD static GIP : DotQR.PayloadGenerator+BezahlCode+Currency = 292
+  FIELD static GMD : DotQR.PayloadGenerator+BezahlCode+Currency = 270
+  FIELD static GNF : DotQR.PayloadGenerator+BezahlCode+Currency = 324
+  FIELD static GTQ : DotQR.PayloadGenerator+BezahlCode+Currency = 320
+  FIELD static GYD : DotQR.PayloadGenerator+BezahlCode+Currency = 328
+  FIELD static HKD : DotQR.PayloadGenerator+BezahlCode+Currency = 344
+  FIELD static HNL : DotQR.PayloadGenerator+BezahlCode+Currency = 340
+  FIELD static HRK : DotQR.PayloadGenerator+BezahlCode+Currency = 191
+  FIELD static HTG : DotQR.PayloadGenerator+BezahlCode+Currency = 332
+  FIELD static HUF : DotQR.PayloadGenerator+BezahlCode+Currency = 348
+  FIELD static IDR : DotQR.PayloadGenerator+BezahlCode+Currency = 360
+  FIELD static ILS : DotQR.PayloadGenerator+BezahlCode+Currency = 376
+  FIELD static INR : DotQR.PayloadGenerator+BezahlCode+Currency = 356
+  FIELD static IQD : DotQR.PayloadGenerator+BezahlCode+Currency = 368
+  FIELD static IRR : DotQR.PayloadGenerator+BezahlCode+Currency = 364
+  FIELD static ISK : DotQR.PayloadGenerator+BezahlCode+Currency = 352
+  FIELD static JMD : DotQR.PayloadGenerator+BezahlCode+Currency = 388
+  FIELD static JOD : DotQR.PayloadGenerator+BezahlCode+Currency = 400
+  FIELD static JPY : DotQR.PayloadGenerator+BezahlCode+Currency = 392
+  FIELD static KES : DotQR.PayloadGenerator+BezahlCode+Currency = 404
+  FIELD static KGS : DotQR.PayloadGenerator+BezahlCode+Currency = 417
+  FIELD static KHR : DotQR.PayloadGenerator+BezahlCode+Currency = 116
+  FIELD static KMF : DotQR.PayloadGenerator+BezahlCode+Currency = 174
+  FIELD static KPW : DotQR.PayloadGenerator+BezahlCode+Currency = 408
+  FIELD static KRW : DotQR.PayloadGenerator+BezahlCode+Currency = 410
+  FIELD static KWD : DotQR.PayloadGenerator+BezahlCode+Currency = 414
+  FIELD static KYD : DotQR.PayloadGenerator+BezahlCode+Currency = 136
+  FIELD static KZT : DotQR.PayloadGenerator+BezahlCode+Currency = 398
+  FIELD static LAK : DotQR.PayloadGenerator+BezahlCode+Currency = 418
+  FIELD static LBP : DotQR.PayloadGenerator+BezahlCode+Currency = 422
+  FIELD static LKR : DotQR.PayloadGenerator+BezahlCode+Currency = 144
+  FIELD static LRD : DotQR.PayloadGenerator+BezahlCode+Currency = 430
+  FIELD static LSL : DotQR.PayloadGenerator+BezahlCode+Currency = 426
+  FIELD static LYD : DotQR.PayloadGenerator+BezahlCode+Currency = 434
+  FIELD static MAD : DotQR.PayloadGenerator+BezahlCode+Currency = 504
+  FIELD static MDL : DotQR.PayloadGenerator+BezahlCode+Currency = 498
+  FIELD static MGA : DotQR.PayloadGenerator+BezahlCode+Currency = 969
+  FIELD static MKD : DotQR.PayloadGenerator+BezahlCode+Currency = 807
+  FIELD static MMK : DotQR.PayloadGenerator+BezahlCode+Currency = 104
+  FIELD static MNT : DotQR.PayloadGenerator+BezahlCode+Currency = 496
+  FIELD static MOP : DotQR.PayloadGenerator+BezahlCode+Currency = 446
+  FIELD static MRO : DotQR.PayloadGenerator+BezahlCode+Currency = 478
+  FIELD static MUR : DotQR.PayloadGenerator+BezahlCode+Currency = 480
+  FIELD static MVR : DotQR.PayloadGenerator+BezahlCode+Currency = 462
+  FIELD static MWK : DotQR.PayloadGenerator+BezahlCode+Currency = 454
+  FIELD static MXN : DotQR.PayloadGenerator+BezahlCode+Currency = 484
+  FIELD static MXV : DotQR.PayloadGenerator+BezahlCode+Currency = 979
+  FIELD static MYR : DotQR.PayloadGenerator+BezahlCode+Currency = 458
+  FIELD static MZN : DotQR.PayloadGenerator+BezahlCode+Currency = 943
+  FIELD static NAD : DotQR.PayloadGenerator+BezahlCode+Currency = 516
+  FIELD static NGN : DotQR.PayloadGenerator+BezahlCode+Currency = 566
+  FIELD static NIO : DotQR.PayloadGenerator+BezahlCode+Currency = 558
+  FIELD static NOK : DotQR.PayloadGenerator+BezahlCode+Currency = 578
+  FIELD static NPR : DotQR.PayloadGenerator+BezahlCode+Currency = 524
+  FIELD static NZD : DotQR.PayloadGenerator+BezahlCode+Currency = 554
+  FIELD static OMR : DotQR.PayloadGenerator+BezahlCode+Currency = 512
+  FIELD static PAB : DotQR.PayloadGenerator+BezahlCode+Currency = 590
+  FIELD static PEN : DotQR.PayloadGenerator+BezahlCode+Currency = 604
+  FIELD static PGK : DotQR.PayloadGenerator+BezahlCode+Currency = 598
+  FIELD static PHP : DotQR.PayloadGenerator+BezahlCode+Currency = 608
+  FIELD static PKR : DotQR.PayloadGenerator+BezahlCode+Currency = 586
+  FIELD static PLN : DotQR.PayloadGenerator+BezahlCode+Currency = 985
+  FIELD static PYG : DotQR.PayloadGenerator+BezahlCode+Currency = 600
+  FIELD static QAR : DotQR.PayloadGenerator+BezahlCode+Currency = 634
+  FIELD static RON : DotQR.PayloadGenerator+BezahlCode+Currency = 946
+  FIELD static RSD : DotQR.PayloadGenerator+BezahlCode+Currency = 941
+  FIELD static RUB : DotQR.PayloadGenerator+BezahlCode+Currency = 643
+  FIELD static RWF : DotQR.PayloadGenerator+BezahlCode+Currency = 646
+  FIELD static SAR : DotQR.PayloadGenerator+BezahlCode+Currency = 682
+  FIELD static SBD : DotQR.PayloadGenerator+BezahlCode+Currency = 90
+  FIELD static SCR : DotQR.PayloadGenerator+BezahlCode+Currency = 690
+  FIELD static SDG : DotQR.PayloadGenerator+BezahlCode+Currency = 938
+  FIELD static SEK : DotQR.PayloadGenerator+BezahlCode+Currency = 752
+  FIELD static SGD : DotQR.PayloadGenerator+BezahlCode+Currency = 702
+  FIELD static SHP : DotQR.PayloadGenerator+BezahlCode+Currency = 654
+  FIELD static SLL : DotQR.PayloadGenerator+BezahlCode+Currency = 694
+  FIELD static SOS : DotQR.PayloadGenerator+BezahlCode+Currency = 706
+  FIELD static SRD : DotQR.PayloadGenerator+BezahlCode+Currency = 968
+  FIELD static SSP : DotQR.PayloadGenerator+BezahlCode+Currency = 728
+  FIELD static STD : DotQR.PayloadGenerator+BezahlCode+Currency = 678
+  FIELD static SVC : DotQR.PayloadGenerator+BezahlCode+Currency = 222
+  FIELD static SYP : DotQR.PayloadGenerator+BezahlCode+Currency = 760
+  FIELD static SZL : DotQR.PayloadGenerator+BezahlCode+Currency = 748
+  FIELD static THB : DotQR.PayloadGenerator+BezahlCode+Currency = 764
+  FIELD static TJS : DotQR.PayloadGenerator+BezahlCode+Currency = 972
+  FIELD static TMT : DotQR.PayloadGenerator+BezahlCode+Currency = 934
+  FIELD static TND : DotQR.PayloadGenerator+BezahlCode+Currency = 788
+  FIELD static TOP : DotQR.PayloadGenerator+BezahlCode+Currency = 776
+  FIELD static TRY : DotQR.PayloadGenerator+BezahlCode+Currency = 949
+  FIELD static TTD : DotQR.PayloadGenerator+BezahlCode+Currency = 780
+  FIELD static TWD : DotQR.PayloadGenerator+BezahlCode+Currency = 901
+  FIELD static TZS : DotQR.PayloadGenerator+BezahlCode+Currency = 834
+  FIELD static UAH : DotQR.PayloadGenerator+BezahlCode+Currency = 980
+  FIELD static UGX : DotQR.PayloadGenerator+BezahlCode+Currency = 800
+  FIELD static USD : DotQR.PayloadGenerator+BezahlCode+Currency = 840
+  FIELD static USN : DotQR.PayloadGenerator+BezahlCode+Currency = 997
+  FIELD static UYI : DotQR.PayloadGenerator+BezahlCode+Currency = 940
+  FIELD static UYU : DotQR.PayloadGenerator+BezahlCode+Currency = 858
+  FIELD static UZS : DotQR.PayloadGenerator+BezahlCode+Currency = 860
+  FIELD static VEF : DotQR.PayloadGenerator+BezahlCode+Currency = 937
+  FIELD static VND : DotQR.PayloadGenerator+BezahlCode+Currency = 704
+  FIELD static VUV : DotQR.PayloadGenerator+BezahlCode+Currency = 548
+  FIELD static WST : DotQR.PayloadGenerator+BezahlCode+Currency = 882
+  FIELD static XAF : DotQR.PayloadGenerator+BezahlCode+Currency = 950
+  FIELD static XAG : DotQR.PayloadGenerator+BezahlCode+Currency = 961
+  FIELD static XAU : DotQR.PayloadGenerator+BezahlCode+Currency = 959
+  FIELD static XBA : DotQR.PayloadGenerator+BezahlCode+Currency = 955
+  FIELD static XBB : DotQR.PayloadGenerator+BezahlCode+Currency = 956
+  FIELD static XBC : DotQR.PayloadGenerator+BezahlCode+Currency = 957
+  FIELD static XBD : DotQR.PayloadGenerator+BezahlCode+Currency = 958
+  FIELD static XCD : DotQR.PayloadGenerator+BezahlCode+Currency = 951
+  FIELD static XDR : DotQR.PayloadGenerator+BezahlCode+Currency = 960
+  FIELD static XOF : DotQR.PayloadGenerator+BezahlCode+Currency = 952
+  FIELD static XPD : DotQR.PayloadGenerator+BezahlCode+Currency = 964
+  FIELD static XPF : DotQR.PayloadGenerator+BezahlCode+Currency = 953
+  FIELD static XPT : DotQR.PayloadGenerator+BezahlCode+Currency = 962
+  FIELD static XSU : DotQR.PayloadGenerator+BezahlCode+Currency = 994
+  FIELD static XTS : DotQR.PayloadGenerator+BezahlCode+Currency = 963
+  FIELD static XUA : DotQR.PayloadGenerator+BezahlCode+Currency = 965
+  FIELD static XXX : DotQR.PayloadGenerator+BezahlCode+Currency = 999
+  FIELD static YER : DotQR.PayloadGenerator+BezahlCode+Currency = 886
+  FIELD static ZAR : DotQR.PayloadGenerator+BezahlCode+Currency = 710
+  FIELD static ZMW : DotQR.PayloadGenerator+BezahlCode+Currency = 967
+  FIELD static ZWL : DotQR.PayloadGenerator+BezahlCode+Currency = 932
+
+TYPE DotQR.PayloadGenerator+BitcoinAddress [class] : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress
+  CTOR (System.String address, Nullable<System.Double> amount, System.String label = null, System.String message = null)
+
+TYPE DotQR.PayloadGenerator+BitcoinCashAddress [class] : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress
+  CTOR (System.String address, Nullable<System.Double> amount, System.String label = null, System.String message = null)
+
+TYPE DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress [class] : DotQR.PayloadGenerator+Payload
+  CTOR (DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress+BitcoinLikeCryptoCurrencyType currencyType, System.String address, Nullable<System.Double> amount, System.String label = null, System.String message = null)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress+BitcoinLikeCryptoCurrencyType [enum] : System.Enum
+  FIELD static Bitcoin : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress+BitcoinLikeCryptoCurrencyType = 0
+  FIELD static BitcoinCash : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress+BitcoinLikeCryptoCurrencyType = 1
+  FIELD static Litecoin : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress+BitcoinLikeCryptoCurrencyType = 2
+
+TYPE DotQR.PayloadGenerator+Bookmark [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String url, System.String title)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+CalendarEvent [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String subject, System.String description, System.String location, System.DateTime start, System.DateTime end, System.Boolean allDayEvent, DotQR.PayloadGenerator+CalendarEvent+EventEncoding encoding = Universal)
+  CTOR (System.String subject, System.String description, System.String location, System.DateTimeOffset start, System.DateTimeOffset end, System.Boolean allDayEvent, DotQR.PayloadGenerator+CalendarEvent+EventEncoding encoding = Universal)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+CalendarEvent+EventEncoding [enum] : System.Enum
+  FIELD static Universal : DotQR.PayloadGenerator+CalendarEvent+EventEncoding = 1
+  FIELD static iCalComplete : DotQR.PayloadGenerator+CalendarEvent+EventEncoding = 0
+
+TYPE DotQR.PayloadGenerator+ContactData [class] : DotQR.PayloadGenerator+Payload
+  CTOR (DotQR.PayloadGenerator+ContactData+ContactOutputType outputType, System.String firstname, System.String lastname, System.String nickname = null, System.String phone = null, System.String mobilePhone = null, System.String workPhone = null, System.String email = null, Nullable<System.DateTime> birthday = null, System.String website = null, System.String street = null, System.String houseNumber = null, System.String city = null, System.String zipCode = null, System.String country = null, System.String note = null, System.String stateRegion = null, DotQR.PayloadGenerator+ContactData+AddressOrder addressOrder = Default, System.String org = null, System.String orgTitle = null)
+  CTOR (DotQR.PayloadGenerator+ContactData+ContactOutputType outputType, System.String firstname, System.String lastname, System.String nickname, System.String phone, System.String mobilePhone, System.String workPhone, System.String email, Nullable<System.DateTime> birthday, System.String website, System.String street, System.String houseNumber, System.String city, System.String zipCode, System.String country, System.String note, System.String stateRegion, DotQR.PayloadGenerator+ContactData+AddressOrder addressOrder, System.String org, System.String orgTitle, DotQR.PayloadGenerator+ContactData+AddressType addressType)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+ContactData+AddressOrder [enum] : System.Enum
+  FIELD static Default : DotQR.PayloadGenerator+ContactData+AddressOrder = 0
+  FIELD static Reversed : DotQR.PayloadGenerator+ContactData+AddressOrder = 1
+
+TYPE DotQR.PayloadGenerator+ContactData+AddressType [enum] : System.Enum
+  FIELD static Home : DotQR.PayloadGenerator+ContactData+AddressType = 0
+  FIELD static HomePreferred : DotQR.PayloadGenerator+ContactData+AddressType = 2
+  FIELD static Work : DotQR.PayloadGenerator+ContactData+AddressType = 1
+  FIELD static WorkPreferred : DotQR.PayloadGenerator+ContactData+AddressType = 3
+
+TYPE DotQR.PayloadGenerator+ContactData+ContactOutputType [enum] : System.Enum
+  FIELD static MeCard : DotQR.PayloadGenerator+ContactData+ContactOutputType = 0
+  FIELD static VCard21 : DotQR.PayloadGenerator+ContactData+ContactOutputType = 1
+  FIELD static VCard3 : DotQR.PayloadGenerator+ContactData+ContactOutputType = 2
+  FIELD static VCard4 : DotQR.PayloadGenerator+ContactData+ContactOutputType = 3
+
+TYPE DotQR.PayloadGenerator+Geolocation [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String latitude, System.String longitude, DotQR.PayloadGenerator+Geolocation+GeolocationEncoding encoding = GEO)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+Geolocation+GeolocationEncoding [enum] : System.Enum
+  FIELD static GEO : DotQR.PayloadGenerator+Geolocation+GeolocationEncoding = 0
+  FIELD static GoogleMaps : DotQR.PayloadGenerator+Geolocation+GeolocationEncoding = 1
+
+TYPE DotQR.PayloadGenerator+Girocode [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String iban, System.String bic, System.String name, System.Decimal amount, System.String remittanceInformation = "", DotQR.PayloadGenerator+Girocode+TypeOfRemittance typeOfRemittance = Unstructured, System.String purposeOfCreditTransfer = "", System.String messageToGirocodeUser = "", DotQR.PayloadGenerator+Girocode+GirocodeVersion version = Version1, DotQR.PayloadGenerator+Girocode+GirocodeEncoding encoding = ISO_8859_1)
+  METHOD ToString() : System.String
+  PROPERTY EccLevel : DotQR.QRCodeGenerator+ECCLevel (get)
+
+TYPE DotQR.PayloadGenerator+Girocode+GirocodeEncoding [enum] : System.Enum
+  FIELD static ISO_8859_1 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 1
+  FIELD static ISO_8859_10 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 6
+  FIELD static ISO_8859_15 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 7
+  FIELD static ISO_8859_2 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 2
+  FIELD static ISO_8859_4 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 3
+  FIELD static ISO_8859_5 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 4
+  FIELD static ISO_8859_7 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 5
+  FIELD static UTF_8 : DotQR.PayloadGenerator+Girocode+GirocodeEncoding = 0
+
+TYPE DotQR.PayloadGenerator+Girocode+GirocodeException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+Girocode+GirocodeVersion [enum] : System.Enum
+  FIELD static Version1 : DotQR.PayloadGenerator+Girocode+GirocodeVersion = 0
+  FIELD static Version2 : DotQR.PayloadGenerator+Girocode+GirocodeVersion = 1
+
+TYPE DotQR.PayloadGenerator+Girocode+TypeOfRemittance [enum] : System.Enum
+  FIELD static Structured : DotQR.PayloadGenerator+Girocode+TypeOfRemittance = 0
+  FIELD static Unstructured : DotQR.PayloadGenerator+Girocode+TypeOfRemittance = 1
+
+TYPE DotQR.PayloadGenerator+LitecoinAddress [class] : DotQR.PayloadGenerator+BitcoinLikeCryptoCurrencyAddress
+  CTOR (System.String address, Nullable<System.Double> amount, System.String label = null, System.String message = null)
+
+TYPE DotQR.PayloadGenerator+MMS [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String number, DotQR.PayloadGenerator+MMS+MMSEncoding encoding = MMS)
+  CTOR (System.String number, System.String subject, DotQR.PayloadGenerator+MMS+MMSEncoding encoding = MMS)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+MMS+MMSEncoding [enum] : System.Enum
+  FIELD static MMS : DotQR.PayloadGenerator+MMS+MMSEncoding = 0
+  FIELD static MMSTO : DotQR.PayloadGenerator+MMS+MMSEncoding = 1
+
+TYPE DotQR.PayloadGenerator+Mail [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String mailReceiver = null, System.String subject = null, System.String message = null, DotQR.PayloadGenerator+Mail+MailEncoding encoding = MAILTO)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+Mail+MailEncoding [enum] : System.Enum
+  FIELD static MAILTO : DotQR.PayloadGenerator+Mail+MailEncoding = 0
+  FIELD static MATMSG : DotQR.PayloadGenerator+Mail+MailEncoding = 1
+  FIELD static SMTP : DotQR.PayloadGenerator+Mail+MailEncoding = 2
+
+TYPE DotQR.PayloadGenerator+MoneroTransaction [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String address, Nullable<System.Single> txAmount = null, System.String txPaymentId = null, System.String recipientName = null, System.String txDescription = null)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+MoneroTransaction+MoneroTransactionException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+OneTimePassword [class] : DotQR.PayloadGenerator+Payload
+  CTOR ()
+  METHOD ToString() : System.String
+  PROPERTY Algorithm : DotQR.PayloadGenerator+OneTimePassword+OoneTimePasswordAuthAlgorithm (get/set)
+  PROPERTY AuthAlgorithm : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthAlgorithm (get/set)
+  PROPERTY Counter : Nullable<System.Int32> (get/set)
+  PROPERTY Digits : System.Int32 (get/set)
+  PROPERTY Issuer : System.String (get/set)
+  PROPERTY Label : System.String (get/set)
+  PROPERTY Period : Nullable<System.Int32> (get/set)
+  PROPERTY Secret : System.String (get/set)
+  PROPERTY Type : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthType (get/set)
+
+TYPE DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthAlgorithm [enum] : System.Enum
+  FIELD static SHA1 : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthAlgorithm = 0
+  FIELD static SHA256 : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthAlgorithm = 1
+  FIELD static SHA512 : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthAlgorithm = 2
+
+TYPE DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthType [enum] : System.Enum
+  FIELD static HOTP : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthType = 1
+  FIELD static TOTP : DotQR.PayloadGenerator+OneTimePassword+OneTimePasswordAuthType = 0
+
+TYPE DotQR.PayloadGenerator+OneTimePassword+OoneTimePasswordAuthAlgorithm [enum] : System.Enum
+  FIELD static SHA1 : DotQR.PayloadGenerator+OneTimePassword+OoneTimePasswordAuthAlgorithm = 0
+  FIELD static SHA256 : DotQR.PayloadGenerator+OneTimePassword+OoneTimePasswordAuthAlgorithm = 1
+  FIELD static SHA512 : DotQR.PayloadGenerator+OneTimePassword+OoneTimePasswordAuthAlgorithm = 2
+
+TYPE DotQR.PayloadGenerator+Payload [abstract class]
+  METHOD ToString() : System.String
+  PROPERTY EccLevel : DotQR.QRCodeGenerator+ECCLevel (get)
+  PROPERTY EciMode : DotQR.QRCodeGenerator+EciMode (get)
+  PROPERTY Version : System.Int32 (get)
+
+TYPE DotQR.PayloadGenerator+PhoneNumber [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String number)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+RussiaPaymentOrder [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String name, System.String personalAcc, System.String bankName, System.String BIC, System.String correspAcc, DotQR.PayloadGenerator+RussiaPaymentOrder+OptionalFields optionalFields = null, DotQR.PayloadGenerator+RussiaPaymentOrder+CharacterSets characterSet = utf_8)
+  METHOD ToBytes() : System.Byte[]
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+RussiaPaymentOrder+CharacterSets [enum] : System.Enum
+  FIELD static koi8_r : DotQR.PayloadGenerator+RussiaPaymentOrder+CharacterSets = 3
+  FIELD static utf_8 : DotQR.PayloadGenerator+RussiaPaymentOrder+CharacterSets = 2
+  FIELD static windows_1251 : DotQR.PayloadGenerator+RussiaPaymentOrder+CharacterSets = 1
+
+TYPE DotQR.PayloadGenerator+RussiaPaymentOrder+OptionalFields [class]
+  CTOR ()
+  PROPERTY AddAmount : System.String (get/set)
+  PROPERTY BirthDate : Nullable<System.DateTime> (get/set)
+  PROPERTY CBC : System.String (get/set)
+  PROPERTY Category : System.String (get/set)
+  PROPERTY ChildFio : System.String (get/set)
+  PROPERTY ClassNum : System.String (get/set)
+  PROPERTY Contract : System.String (get/set)
+  PROPERTY CounterId : System.String (get/set)
+  PROPERTY CounterVal : System.String (get/set)
+  PROPERTY DocDate : Nullable<System.DateTime> (get/set)
+  PROPERTY DocIdx : System.String (get/set)
+  PROPERTY DocNo : System.String (get/set)
+  PROPERTY DrawerStatus : System.String (get/set)
+  PROPERTY ExecId : System.String (get/set)
+  PROPERTY FirstName : System.String (get/set)
+  PROPERTY Flat : System.String (get/set)
+  PROPERTY InstNum : System.String (get/set)
+  PROPERTY KPP : System.String (get/set)
+  PROPERTY LastName : System.String (get/set)
+  PROPERTY MiddleName : System.String (get/set)
+  PROPERTY OKTMO : System.String (get/set)
+  PROPERTY PayeeINN : System.String (get/set)
+  PROPERTY PayerAddress : System.String (get/set)
+  PROPERTY PayerINN : System.String (get/set)
+  PROPERTY PayerIdNum : System.String (get/set)
+  PROPERTY PayerIdType : System.String (get/set)
+  PROPERTY PaymPeriod : System.String (get/set)
+  PROPERTY PaymTerm : System.String (get/set)
+  PROPERTY PaytReason : System.String (get/set)
+  PROPERTY PensAcc : System.String (get/set)
+  PROPERTY PersAcc : System.String (get/set)
+  PROPERTY PersonalAccount : System.String (get/set)
+  PROPERTY Phone : System.String (get/set)
+  PROPERTY Purpose : System.String (get/set)
+  PROPERTY QuittDate : Nullable<System.DateTime> (get/set)
+  PROPERTY QuittId : System.String (get/set)
+  PROPERTY RegType : System.String (get/set)
+  PROPERTY RuleId : System.String (get/set)
+  PROPERTY ServiceName : System.String (get/set)
+  PROPERTY SpecFio : System.String (get/set)
+  PROPERTY Sum : System.String (get/set)
+  PROPERTY TaxPaytKind : System.String (get/set)
+  PROPERTY TaxPeriod : System.String (get/set)
+  PROPERTY TechCode : Nullable<DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode> (get/set)
+  PROPERTY UIN : System.String (get/set)
+
+TYPE DotQR.PayloadGenerator+RussiaPaymentOrder+RussiaPaymentOrderException [class] : System.Exception
+  CTOR (System.String message)
+
+TYPE DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode [enum] : System.Enum
+  FIELD static Благотворительные_и_общественные_организации : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 14
+  FIELD static ГИБДД_налоги_пошлины_бюджетные_платежи : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 3
+  FIELD static Инвестиции_и_страхование : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 12
+  FIELD static Интернет_и_ТВ : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 9
+  FIELD static Коммунальные_услуги_ЖКХAFN : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 2
+  FIELD static Мобильная_связь_стационарный_телефон : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 1
+  FIELD static Образовательные_учреждения : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 8
+  FIELD static Отдых_и_путешествия : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 11
+  FIELD static Охранные_услуги : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 4
+  FIELD static ПФР : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 6
+  FIELD static Погашение_кредитов : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 7
+  FIELD static Прочие_услуги : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 15
+  FIELD static Спорт_и_здоровье : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 13
+  FIELD static Услуги_оказываемые_УФМС : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 5
+  FIELD static Электронные_деньги : DotQR.PayloadGenerator+RussiaPaymentOrder+TechCode = 10
+
+TYPE DotQR.PayloadGenerator+SMS [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String number, DotQR.PayloadGenerator+SMS+SMSEncoding encoding = SMS)
+  CTOR (System.String number, System.String subject, DotQR.PayloadGenerator+SMS+SMSEncoding encoding = SMS)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+SMS+SMSEncoding [enum] : System.Enum
+  FIELD static SMS : DotQR.PayloadGenerator+SMS+SMSEncoding = 0
+  FIELD static SMSTO : DotQR.PayloadGenerator+SMS+SMSEncoding = 1
+  FIELD static SMS_iOS : DotQR.PayloadGenerator+SMS+SMSEncoding = 2
+
+TYPE DotQR.PayloadGenerator+ShadowSocksConfig [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String hostname, System.Int32 port, System.String password, DotQR.PayloadGenerator+ShadowSocksConfig+Method method, Dictionary<System.String, System.String> parameters, System.String tag = null)
+  CTOR (System.String hostname, System.Int32 port, System.String password, DotQR.PayloadGenerator+ShadowSocksConfig+Method method, System.String plugin, System.String pluginOption, System.String tag = null)
+  CTOR (System.String hostname, System.Int32 port, System.String password, DotQR.PayloadGenerator+ShadowSocksConfig+Method method, System.String tag = null)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+ShadowSocksConfig+Method [enum] : System.Enum
+  FIELD static Aes128Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 5
+  FIELD static Aes128Cfb1 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 19
+  FIELD static Aes128Cfb8 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 22
+  FIELD static Aes128Ctr : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 8
+  FIELD static Aes128Gcm : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 1
+  FIELD static Aes128Ofb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 16
+  FIELD static Aes192Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 6
+  FIELD static Aes192Cfb1 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 20
+  FIELD static Aes192Cfb8 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 23
+  FIELD static Aes192Ctr : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 9
+  FIELD static Aes192Gcm : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 2
+  FIELD static Aes192Ofb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 17
+  FIELD static Aes256Cb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 15
+  FIELD static Aes256Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 7
+  FIELD static Aes256Cfb1 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 21
+  FIELD static Aes256Cfb8 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 24
+  FIELD static Aes256Ctr : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 10
+  FIELD static Aes256Gcm : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 3
+  FIELD static Aes256Ofb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 18
+  FIELD static BfCfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 26
+  FIELD static Camellia128Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 11
+  FIELD static Camellia192Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 12
+  FIELD static Camellia256Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 13
+  FIELD static Cast5Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 32
+  FIELD static Chacha20 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 25
+  FIELD static Chacha20Ietf : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 14
+  FIELD static Chacha20IetfPoly1305 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 0
+  FIELD static DesCfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 29
+  FIELD static IdeaCfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 30
+  FIELD static Rc2Cfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 31
+  FIELD static Rc4 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 34
+  FIELD static Rc4Md5 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 27
+  FIELD static Salsa20 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 28
+  FIELD static Salsa20Ctr : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 33
+  FIELD static SeedCfb : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 35
+  FIELD static Table : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 36
+  FIELD static XChacha20IetfPoly1305 : DotQR.PayloadGenerator+ShadowSocksConfig+Method = 4
+
+TYPE DotQR.PayloadGenerator+ShadowSocksConfig+ShadowSocksConfigException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+SkypeCall [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String skypeUsername)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+SlovenianUpnQr [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String payerName, System.String payerAddress, System.String payerPlace, System.String recipientName, System.String recipientAddress, System.String recipientPlace, System.String recipientIban, System.String description, System.Double amount, Nullable<System.DateTime> deadline, System.String recipientSiModel = "SI99", System.String recipientSiReference = "", System.String code = "OTHR")
+  CTOR (System.String payerName, System.String payerAddress, System.String payerPlace, System.String recipientName, System.String recipientAddress, System.String recipientPlace, System.String recipientIban, System.String description, System.Double amount, System.String recipientSiModel = "SI00", System.String recipientSiReference = "", System.String code = "OTHR")
+  METHOD ToString() : System.String
+  PROPERTY EccLevel : DotQR.QRCodeGenerator+ECCLevel (get)
+  PROPERTY EciMode : DotQR.QRCodeGenerator+EciMode (get)
+  PROPERTY Version : System.Int32 (get)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode [class] : DotQR.PayloadGenerator+Payload
+  CTOR (DotQR.PayloadGenerator+SwissQrCode+Iban iban, DotQR.PayloadGenerator+SwissQrCode+Currency currency, DotQR.PayloadGenerator+SwissQrCode+Contact creditor, DotQR.PayloadGenerator+SwissQrCode+Reference reference, DotQR.PayloadGenerator+SwissQrCode+AdditionalInformation additionalInformation = null, DotQR.PayloadGenerator+SwissQrCode+Contact debitor = null, Nullable<System.Decimal> amount = null, Nullable<System.DateTime> requestedDateOfPayment = null, DotQR.PayloadGenerator+SwissQrCode+Contact ultimateCreditor = null, System.String alternativeProcedure1 = null, System.String alternativeProcedure2 = null)
+  METHOD ToString() : System.String
+  PROPERTY EccLevel : DotQR.QRCodeGenerator+ECCLevel (get)
+  PROPERTY EciMode : DotQR.QRCodeGenerator+EciMode (get)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+AdditionalInformation [class]
+  CTOR (System.String unstructuredMessage = null, System.String billInformation = null)
+  PROPERTY BillInformation : System.String (get)
+  PROPERTY Trailer : System.String (get)
+  PROPERTY UnstructureMessage : System.String (get)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+AdditionalInformation+SwissQrCodeAdditionalInformationException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Contact [class]
+  CTOR (System.String name, System.String country, System.String addressLine1, System.String addressLine2)
+  CTOR (System.String name, System.String zipCode, System.String city, System.String country, System.String street = null, System.String houseNumber = null)
+  METHOD ToString() : System.String
+  METHOD static WithCombinedAddress(System.String name, System.String country, System.String addressLine1, System.String addressLine2) : DotQR.PayloadGenerator+SwissQrCode+Contact
+  METHOD static WithStructuredAddress(System.String name, System.String zipCode, System.String city, System.String country, System.String street = null, System.String houseNumber = null) : DotQR.PayloadGenerator+SwissQrCode+Contact
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Contact+AddressType [enum] : System.Enum
+  FIELD static CombinedAddress : DotQR.PayloadGenerator+SwissQrCode+Contact+AddressType = 1
+  FIELD static StructuredAddress : DotQR.PayloadGenerator+SwissQrCode+Contact+AddressType = 0
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Contact+SwissQrCodeContactException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Currency [enum] : System.Enum
+  FIELD static CHF : DotQR.PayloadGenerator+SwissQrCode+Currency = 756
+  FIELD static EUR : DotQR.PayloadGenerator+SwissQrCode+Currency = 978
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Iban [class]
+  CTOR (System.String iban, DotQR.PayloadGenerator+SwissQrCode+Iban+IbanType ibanType)
+  METHOD ToString() : System.String
+  PROPERTY IsQrIban : System.Boolean (get)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Iban+IbanType [enum] : System.Enum
+  FIELD static Iban : DotQR.PayloadGenerator+SwissQrCode+Iban+IbanType = 0
+  FIELD static QrIban : DotQR.PayloadGenerator+SwissQrCode+Iban+IbanType = 1
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Iban+SwissQrCodeIbanException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Reference [class]
+  CTOR (DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType referenceType, System.String reference = null, Nullable<DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceTextType> referenceTextType = null)
+  PROPERTY RefType : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType (get)
+  PROPERTY ReferenceText : System.String (get)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceTextType [enum] : System.Enum
+  FIELD static CreditorReferenceIso11649 : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceTextType = 1
+  FIELD static QrReference : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceTextType = 0
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType [enum] : System.Enum
+  FIELD static NON : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType = 2
+  FIELD static QRR : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType = 0
+  FIELD static SCOR : DotQR.PayloadGenerator+SwissQrCode+Reference+ReferenceType = 1
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+Reference+SwissQrCodeReferenceException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+SwissQrCode+SwissQrCodeException [class] : System.Exception
+  CTOR ()
+  CTOR (System.String message)
+  CTOR (System.String message, System.Exception inner)
+
+TYPE DotQR.PayloadGenerator+Url [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String url)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+WhatsAppMessage [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String message)
+  CTOR (System.String number, System.String message)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+WiFi [class] : DotQR.PayloadGenerator+Payload
+  CTOR (System.String ssid, System.String password, DotQR.PayloadGenerator+WiFi+Authentication authenticationMode, System.Boolean isHiddenSSID = false, System.Boolean escapeHexStrings = true)
+  METHOD ToString() : System.String
+
+TYPE DotQR.PayloadGenerator+WiFi+Authentication [enum] : System.Enum
+  FIELD static WEP : DotQR.PayloadGenerator+WiFi+Authentication = 0
+  FIELD static WPA : DotQR.PayloadGenerator+WiFi+Authentication = 1
+  FIELD static WPA2 : DotQR.PayloadGenerator+WiFi+Authentication = 3
+  FIELD static nopass : DotQR.PayloadGenerator+WiFi+Authentication = 2
+
+TYPE DotQR.QRCodeData [class]
+  CTOR (System.Byte[] rawData, DotQR.QRCodeData+Compression compressMode)
+  CTOR (System.Int32 version)
+  CTOR (System.Int32 version, System.Boolean addPadding)
+  CTOR (System.String pathToRawData, DotQR.QRCodeData+Compression compressMode)
+  METHOD Dispose() : System.Void
+  METHOD GetRawData(DotQR.QRCodeData+Compression compressMode) : System.Byte[]
+  METHOD SaveRawData(System.String filePath, DotQR.QRCodeData+Compression compressMode) : System.Void
+  PROPERTY ModuleMatrix : List<System.Collections.BitArray> (get/set)
+  PROPERTY Version : System.Int32 (get)
+
+TYPE DotQR.QRCodeData+Compression [enum] : System.Enum
+  FIELD static Deflate : DotQR.QRCodeData+Compression = 1
+  FIELD static GZip : DotQR.QRCodeData+Compression = 2
+  FIELD static Uncompressed : DotQR.QRCodeData+Compression = 0
+
+TYPE DotQR.QRCodeGenerator [class]
+  CTOR ()
+  METHOD CreateQrCode(DotQR.PayloadGenerator+Payload payload) : DotQR.QRCodeData
+  METHOD CreateQrCode(DotQR.PayloadGenerator+Payload payload, DotQR.QRCodeGenerator+ECCLevel eccLevel) : DotQR.QRCodeData
+  METHOD CreateQrCode(System.Byte[] binaryData, DotQR.QRCodeGenerator+ECCLevel eccLevel) : DotQR.QRCodeData
+  METHOD CreateQrCode(System.String plainText, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1) : DotQR.QRCodeData
+  METHOD Dispose() : System.Void
+  METHOD static GenerateMicroQrCode(System.String plainText, DotQR.QRCodeGenerator+ECCLevel eccLevel = Default, System.Int32 requestedVersion = 0) : DotQR.QRCodeData
+  METHOD static GenerateQrCode(DotQR.PayloadGenerator+Payload payload) : DotQR.QRCodeData
+  METHOD static GenerateQrCode(DotQR.PayloadGenerator+Payload payload, DotQR.QRCodeGenerator+ECCLevel eccLevel) : DotQR.QRCodeData
+  METHOD static GenerateQrCode(System.Byte[] binaryData, DotQR.QRCodeGenerator+ECCLevel eccLevel) : DotQR.QRCodeData
+  METHOD static GenerateQrCode(System.String plainText, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1) : DotQR.QRCodeData
+
+TYPE DotQR.QRCodeGenerator+ECCLevel [enum] : System.Enum
+  FIELD static Default : DotQR.QRCodeGenerator+ECCLevel = -1
+  FIELD static H : DotQR.QRCodeGenerator+ECCLevel = 3
+  FIELD static L : DotQR.QRCodeGenerator+ECCLevel = 0
+  FIELD static M : DotQR.QRCodeGenerator+ECCLevel = 1
+  FIELD static Q : DotQR.QRCodeGenerator+ECCLevel = 2
+
+TYPE DotQR.QRCodeGenerator+EciMode [enum] : System.Enum
+  FIELD static Default : DotQR.QRCodeGenerator+EciMode = 0
+  FIELD static Iso8859_1 : DotQR.QRCodeGenerator+EciMode = 3
+  FIELD static Iso8859_2 : DotQR.QRCodeGenerator+EciMode = 4
+  FIELD static Utf8 : DotQR.QRCodeGenerator+EciMode = 26
+
+TYPE DotQR.RgbaColor [struct]
+  CTOR (System.Byte red, System.Byte green, System.Byte blue)
+  CTOR (System.Byte red, System.Byte green, System.Byte blue, System.Byte alpha)
+  METHOD Equals(DotQR.RgbaColor other) : System.Boolean
+  METHOD Equals(System.Object obj) : System.Boolean
+  METHOD GetHashCode() : System.Int32
+  METHOD ToHtmlHex() : System.String
+  METHOD ToRgbBytes() : System.Byte[]
+  METHOD ToRgbaBytes() : System.Byte[]
+  METHOD ToString() : System.String
+  METHOD static Parse(System.String value) : DotQR.RgbaColor
+  METHOD static TryParse(System.String value, ref DotQR.RgbaColor color) : System.Boolean
+  PROPERTY A : System.Byte (get)
+  PROPERTY B : System.Byte (get)
+  PROPERTY Black : DotQR.RgbaColor (get)
+  PROPERTY G : System.Byte (get)
+  PROPERTY IsOpaque : System.Boolean (get)
+  PROPERTY IsTransparent : System.Boolean (get)
+  PROPERTY R : System.Byte (get)
+  PROPERTY Transparent : DotQR.RgbaColor (get)
+  PROPERTY White : DotQR.RgbaColor (get)
+
+TYPE DotQR.Size [struct]
+  CTOR (System.Int32 width, System.Int32 height)
+  METHOD Equals(DotQR.Size other) : System.Boolean
+  METHOD Equals(System.Object obj) : System.Boolean
+  METHOD GetHashCode() : System.Int32
+  METHOD ToString() : System.String
+  PROPERTY Empty : DotQR.Size (get)
+  PROPERTY Height : System.Int32 (get)
+  PROPERTY IsEmpty : System.Boolean (get)
+  PROPERTY Width : System.Int32 (get)

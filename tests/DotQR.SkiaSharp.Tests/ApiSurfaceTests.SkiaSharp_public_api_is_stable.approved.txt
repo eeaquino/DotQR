@@ -1,0 +1,53 @@
+ASSEMBLY DotQR.SkiaSharp
+
+TYPE DotQR.ArtQRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(SkiaSharp.SKBitmap backgroundImage = null) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKColor backgroundColor, SkiaSharp.SKBitmap backgroundImage = null, System.Double pixelSizeFactor = 1, System.Boolean drawQuietZones = true, DotQR.ArtQRCode+QuietZoneStyle quietZoneRenderingStyle = Dotted, DotQR.ArtQRCode+BackgroundImageStyle backgroundImageStyle = DataAreaOnly, SkiaSharp.SKBitmap finderPatternImage = null) : SkiaSharp.SKBitmap
+
+TYPE DotQR.ArtQRCode+BackgroundImageStyle [enum] : System.Enum
+  FIELD static DataAreaOnly : DotQR.ArtQRCode+BackgroundImageStyle = 1
+  FIELD static Fill : DotQR.ArtQRCode+BackgroundImageStyle = 0
+
+TYPE DotQR.ArtQRCode+QuietZoneStyle [enum] : System.Enum
+  FIELD static Dotted : DotQR.ArtQRCode+QuietZoneStyle = 0
+  FIELD static Flat : DotQR.ArtQRCode+QuietZoneStyle = 1
+
+TYPE DotQR.ArtQRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKColor backgroundColor, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, SkiaSharp.SKBitmap backgroundImage = null, System.Double pixelSizeFactor = 1, System.Boolean drawQuietZones = true, DotQR.ArtQRCode+QuietZoneStyle quietZoneRenderingStyle = Flat, DotQR.ArtQRCode+BackgroundImageStyle backgroundImageStyle = DataAreaOnly, SkiaSharp.SKBitmap finderPatternImage = null) : SkiaSharp.SKBitmap
+
+TYPE DotQR.Base64QRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKBitmap icon, System.Int32 iconSizePercent = 15, System.Int32 iconBorderWidth = 6, System.Boolean drawQuietZones = true, DotQR.Base64QRCode+ImageType imgType = Png) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, System.Boolean drawQuietZones = true, DotQR.Base64QRCode+ImageType imgType = Png) : System.String
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, System.Boolean drawQuietZones = true, DotQR.Base64QRCode+ImageType imgType = Png) : System.String
+
+TYPE DotQR.Base64QRCode+ImageType [enum] : System.Enum
+  FIELD static Jpeg : DotQR.Base64QRCode+ImageType = 1
+  FIELD static Png : DotQR.Base64QRCode+ImageType = 0
+  FIELD static Webp : DotQR.Base64QRCode+ImageType = 2
+
+TYPE DotQR.Base64QRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, System.Boolean drawQuietZones = true, DotQR.Base64QRCode+ImageType imgType = Png) : System.String
+
+TYPE DotQR.QRCode [class] : DotQR.AbstractQRCode
+  CTOR ()
+  CTOR (DotQR.QRCodeData data)
+  METHOD GetGraphic(System.Int32 pixelsPerModule) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKBitmap icon = null, System.Int32 iconSizePercent = 15, System.Int32 iconBorderWidth = 0, System.Boolean drawQuietZones = true, Nullable<SkiaSharp.SKColor> iconBackgroundColor = null) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, System.Boolean drawQuietZones = true) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, System.Boolean drawQuietZones = true) : SkiaSharp.SKBitmap
+
+TYPE DotQR.QRCodeHelper [static class]
+  METHOD static GetQRCode(System.String plainText, System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, DotQR.QRCodeGenerator+ECCLevel eccLevel, System.Boolean forceUtf8 = false, System.Boolean utf8BOM = false, DotQR.QRCodeGenerator+EciMode eciMode = Default, System.Int32 requestedVersion = -1, SkiaSharp.SKBitmap icon = null, System.Int32 iconSizePercent = 15, System.Int32 iconBorderWidth = 0, System.Boolean drawQuietZones = true) : SkiaSharp.SKBitmap
+
+TYPE DotQR.SkiaColorExtensions [static class]
+  METHOD static ToRgbaColor(SkiaSharp.SKColor color) : DotQR.RgbaColor
+  METHOD static ToSKColor(DotQR.RgbaColor color) : SkiaSharp.SKColor
+
+TYPE DotQR.SvgLogoExtensions [static class]
+  METHOD static ToSvgLogo(SkiaSharp.SKBitmap icon, System.Int32 iconSizePercent = 15, System.Boolean fillLogoBackground = true) : DotQR.SvgQRCode+SvgLogo
