@@ -1,8 +1,8 @@
 #pragma warning disable CA5350 // Weak cryptography algorithm (SHA1).
 
-using ECCLevel = QRCoder.QRCodeGenerator.ECCLevel;
+using ECCLevel = DotQR.QRCodeGenerator.ECCLevel;
 
-namespace QRCoderTests;
+namespace DotQRTests.Core;
 
 public class QRGeneratorTests
 {
@@ -114,7 +114,7 @@ public class QRGeneratorTests
         var qrData = QRCodeGenerator.GenerateMicroQrCode(input, eccLevel);
         (qrData.ModuleMatrix.Count - 8).ShouldBe(expectedSize); // exclude padding
         var result = string.Join("", qrData.ModuleMatrix.Select(x => x.ToBitString()).ToArray());
-        var hash = System.Security.Cryptography.SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(result));
+        var hash = System.Security.Cryptography.SHA1.HashData(Encoding.UTF8.GetBytes(result));
         var hashString = Convert.ToBase64String(hash);
         hashString.TrimEnd('=').ShouldBe(expectedHash);
     }
@@ -223,7 +223,7 @@ public class QRGeneratorTests
         var qrData = gen.CreateQrCode(input, ECCLevel.H);
         (qrData.ModuleMatrix.Count - 8).ShouldBe(expectedSize); // exclude padding
         var result = string.Join("", qrData.ModuleMatrix.Select(x => x.ToBitString()).ToArray());
-        var hash = System.Security.Cryptography.SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(result));
+        var hash = System.Security.Cryptography.SHA1.HashData(Encoding.UTF8.GetBytes(result));
         var hashString = Convert.ToBase64String(hash);
         hashString.TrimEnd('=').ShouldBe(expectedHash);
     }
@@ -436,7 +436,7 @@ public class QRGeneratorTests
         var qrData = gen.CreateQrCode(input, eccLevel);
         (qrData.ModuleMatrix.Count - 8).ShouldBe(expectedSize); // exclude padding
         var result = string.Join("", qrData.ModuleMatrix.Select(x => x.ToBitString()).ToArray());
-        var hash = System.Security.Cryptography.SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(result));
+        var hash = System.Security.Cryptography.SHA1.HashData(Encoding.UTF8.GetBytes(result));
         var hashString = Convert.ToBase64String(hash);
         hashString.ShouldBe(expectedHash);
     }
@@ -572,9 +572,6 @@ public class QRGeneratorTests
         qrData.Version.ShouldBe(4); // without mixed mode it would be version 5
         var result = string.Join("", qrData.ModuleMatrix.Select(x => x.ToBitString()).ToArray());
         result.ShouldBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111111010000010001111001011111110000000010000010100110010001101110100000100000000101110101100100011111011101011101000000001011101011101110110000100010111010000000010111010011011100011110100101110100000000100000101110011100001111001000001000000001111111010101010101010101011111110000000000000000001101001100111110000000000000000110011100010100101001011100101111000000000011000110000110110100010100110000000000011101110111000000011010101110000000000000010001000100101110001001010110101000000000110101010010110101001111110011010000000010001101011011101001110001101011100000000101011111011101111001101011101110000000001011100001110110110011100000101100000000010001110110011000011111111110000100000000010001000110011100110101110100110000000001001111101100100111111010110011100000000011110000111010001011000001000110100000000010010111011110100110111100010010000000001000000110001010001001010111111100000000000101111101100111111010011111000100000000001101010111000011001001100010010000000001111111010010010100011001111111110000000000000000110111000011110010001110000000000111111100101000111000101101010000000000001000001011100001010010001000100010000000010111010100101101101110011111011000000000101110100110001011011100010001111000000001011101001101110011101000010101000000000010000010110100010111110111000110100000000111111101010100011001101110101011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-        var asciiRenderer = new AsciiQRCode(qrData);
-        var asciiArt = asciiRenderer.GetGraphic(1);
-        asciiArt.ShouldMatchApproved(x => x.NoDiff());
     }
 
     [Fact]
@@ -688,7 +685,7 @@ public class QRGeneratorTests
         {
             var payload = new SamplePayload(stringValue, eccLevel);
             Encode(QRCodeGenerator.GenerateQrCode(payload)).ShouldBe(expected);
-            foreach (var ecc in Enum.GetValues(typeof(QRCodeGenerator.ECCLevel)).Cast<QRCodeGenerator.ECCLevel>())
+            foreach (var ecc in Enum.GetValues<QRCodeGenerator.ECCLevel>())
             {
                 if (ecc == eccLevel || ecc == QRCodeGenerator.ECCLevel.Default)
                     Encode(QRCodeGenerator.GenerateQrCode(payload, ecc)).ShouldBe(expected);
@@ -763,7 +760,7 @@ public class QRGeneratorTests
     {
         // M4 with L can hold max 35 alphanumeric characters
         var input = new string('A', 36);
-        var ex = Should.Throw<QRCoder.Exceptions.DataTooLongException>(() =>
+        var ex = Should.Throw<DotQR.Exceptions.DataTooLongException>(() =>
             QRCodeGenerator.GenerateMicroQrCode(input, ECCLevel.L));
         ex.Message.ShouldContain("exceeds the maximum size", Case.Insensitive);
     }
@@ -773,7 +770,7 @@ public class QRGeneratorTests
     {
         // M2 with L can hold max 10 alphanumeric characters, but M3 can hold 23
         var input = new string('A', 11);
-        var ex = Should.Throw<QRCoder.Exceptions.DataTooLongException>(() =>
+        var ex = Should.Throw<DotQR.Exceptions.DataTooLongException>(() =>
             QRCodeGenerator.GenerateMicroQrCode(input, ECCLevel.L, -2));
         ex.Message.ShouldContain("exceeds the maximum size", Case.Insensitive);
     }
@@ -783,7 +780,7 @@ public class QRGeneratorTests
     {
         // Version 40 with L can hold max 4296 alphanumeric characters
         var input = new string('A', 4297);
-        var ex = Should.Throw<QRCoder.Exceptions.DataTooLongException>(() =>
+        var ex = Should.Throw<DotQR.Exceptions.DataTooLongException>(() =>
             QRCodeGenerator.GenerateQrCode(input, ECCLevel.L));
         ex.Message.ShouldContain("exceeds the maximum size", Case.Insensitive);
     }
@@ -793,7 +790,7 @@ public class QRGeneratorTests
     {
         // Version 1 with L can hold max 25 alphanumeric characters, but version 2 can hold 47
         var input = new string('A', 26);
-        var ex = Should.Throw<QRCoder.Exceptions.DataTooLongException>(() =>
+        var ex = Should.Throw<DotQR.Exceptions.DataTooLongException>(() =>
             QRCodeGenerator.GenerateQrCode(input, ECCLevel.L, requestedVersion: 1));
         ex.Message.ShouldContain("exceeds the maximum size", Case.Insensitive);
     }

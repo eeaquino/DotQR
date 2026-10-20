@@ -1,6 +1,6 @@
-using static QRCoder.PayloadGenerator.BezahlCode;
+using static DotQR.PayloadGenerator.BezahlCode;
 
-namespace QRCoderTests.PayloadGeneratorTests;
+namespace DotQRTests.Core.PayloadGeneratorTests;
 
 public class BezahlCodeTests
 {

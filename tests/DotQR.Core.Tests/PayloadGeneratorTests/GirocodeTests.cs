@@ -1,6 +1,6 @@
-using static QRCoder.QRCodeGenerator;
+using static DotQR.QRCodeGenerator;
 
-namespace QRCoderTests.PayloadGeneratorTests;
+namespace DotQRTests.Core.PayloadGeneratorTests;
 
 public class GirocodeTests
 {

@@ -1,8 +1,8 @@
-using static QRCoder.PayloadGenerator.SwissQrCode.AdditionalInformation;
-using static QRCoder.PayloadGenerator.SwissQrCode.Reference;
-using static QRCoder.QRCodeGenerator;
+using static DotQR.PayloadGenerator.SwissQrCode.AdditionalInformation;
+using static DotQR.PayloadGenerator.SwissQrCode.Reference;
+using static DotQR.QRCodeGenerator;
 
-namespace QRCoderTests.PayloadGeneratorTests;
+namespace DotQRTests.Core.PayloadGeneratorTests;
 
 public class SwissQrCodeTests
 {

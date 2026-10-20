@@ -1,4 +1,4 @@
-namespace QRCoderTests.PayloadGeneratorTests;
+namespace DotQRTests.Core.PayloadGeneratorTests;
 
 public class RussiaPaymentOrderTests
 {
