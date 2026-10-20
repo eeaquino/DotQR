@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotQR.ByteRenderers/DotQR.ByteRenderers.csproj" />
+    <Project Path="src/DotQR.Core/DotQR.Core.csproj" />
+    <Project Path="src/DotQR.SkiaSharp/DotQR.SkiaSharp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DotQR.ByteRenderers.Tests/DotQR.ByteRenderers.Tests.csproj" />
+    <Project Path="tests/DotQR.Core.Tests/DotQR.Core.Tests.csproj" />
+    <Project Path="tests/DotQR.SkiaSharp.Tests/DotQR.SkiaSharp.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/DotQR.Benchmarks/DotQR.Benchmarks.csproj" />
+  </Folder>
+</Solution>
