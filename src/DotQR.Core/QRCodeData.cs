@@ -98,26 +98,25 @@ public class QRCodeData : IDisposable
             Version = ((sideLen - 29) / 4) + 1;
         }
 
-        //Unpack
-        var modules = new Queue<bool>(8 * (rawData.Length - 5));
-        for (int j = 5; j < rawData.Length; j++)
+        //Unpack, most-significant-bit first within each byte, row-major.
+        var sideLength = sideLen;
+        ModuleMatrix = new List<BitArray>(sideLength);
+        var payloadLength = rawData.Length - 5;
+        for (int y = 0; y < sideLength; y++)
         {
-            var b = rawData[j];
-            for (int i = 7; i >= 0; i--)
+            var row = new BitArray(sideLength);
+            var rowBitStart = y * sideLength;
+            for (int x = 0; x < sideLength; x++)
             {
-                modules.Enqueue((b & (1 << i)) != 0);
+                var bitIndex = rowBitStart + x;
+                var byteIndex = bitIndex >> 3;
+                if (byteIndex < payloadLength && (rawData[5 + byteIndex] & (0x80 >> (bitIndex & 7))) != 0)
+                {
+                    row[x] = true;
+                }
             }
-        }
 
-        //Build module matrix
-        ModuleMatrix = new List<BitArray>(sideLen);
-        for (int y = 0; y < sideLen; y++)
-        {
-            ModuleMatrix.Add(new BitArray(sideLen));
-            for (int x = 0; x < sideLen; x++)
-            {
-                ModuleMatrix[y][x] = modules.Dequeue();
-            }
+            ModuleMatrix.Add(row);
         }
     }
 
@@ -153,32 +152,25 @@ public class QRCodeData : IDisposable
             //Add header - rowsize
             targetStream.WriteByte((byte)ModuleMatrix.Count);
 
-            //Build data queue
-            var capacity = ModuleMatrix.Count * ModuleMatrix.Count + 7; // Total modules + max padding for byte alignment
-            var dataQueue = new Queue<int>(capacity);
-            foreach (var row in ModuleMatrix)
+            //Pack modules directly as one continuous bit stream: row-major, most-significant-bit
+            //first, zero-padded only at the end. Rows are *not* byte-aligned, so a per-row write
+            //would change the format. This replaces a Queue<int> with one entry per module.
+            var count = ModuleMatrix.Count;
+            var totalBits = count * count;
+            var packed = new byte[(totalBits + 7) >> 3];
+            var bit = 0;
+            for (var y = 0; y < count; y++)
             {
-                for (int i = 0; i < row.Length; i++)
+                var row = ModuleMatrix[y];
+                for (var x = 0; x < count; x++)
                 {
-                    dataQueue.Enqueue(row[i] ? 1 : 0);
+                    if (row[x])
+                        packed[bit >> 3] |= (byte)(0x80 >> (bit & 7));
+                    bit++;
                 }
-            }
-            int mod = (int)(((uint)ModuleMatrix.Count * (uint)ModuleMatrix.Count) % 8);
-            for (int i = 0; i < 8 - mod; i++)
-            {
-                dataQueue.Enqueue(0);
             }
 
-            //Process queue
-            while (dataQueue.Count > 0)
-            {
-                byte b = 0;
-                for (int i = 7; i >= 0; i--)
-                {
-                    b += (byte)(dataQueue.Dequeue() << i);
-                }
-                targetStream.WriteByte(b);
-            }
+            targetStream.Write(packed, 0, packed.Length);
         }
         finally
         {
