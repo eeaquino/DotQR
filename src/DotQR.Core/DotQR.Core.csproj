@@ -12,7 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The internal helpers in Extensions/ (HexColorToByteArray, AppendInvariant, CopyTo) are
+         shared with the renderer packages, which used to live in the same assembly. -->
+    <InternalsVisibleTo Include="DotQR.ByteRenderers" />
+    <InternalsVisibleTo Include="DotQR.SkiaSharp" />
     <InternalsVisibleTo Include="DotQR.Core.Tests" />
+    <InternalsVisibleTo Include="DotQR.ByteRenderers.Tests" />
   </ItemGroup>
 
 </Project>

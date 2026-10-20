@@ -1,10 +1,8 @@
-#if HAS_SPAN
 using System.Buffers;
-#endif
 using System.IO.Compression;
-using static QRCoder.QRCodeGenerator;
+using static DotQR.QRCodeGenerator;
 
-namespace QRCoder;
+namespace DotQR;
 
 /// <summary>
 /// Represents a QR code generator that outputs QR codes as PNG byte arrays.
@@ -39,14 +37,11 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
         png.WriteHeader(size, size, 1, PngBuilder.ColorType.Greyscale);
         var scanLines = DrawScanlines(pixelsPerModule, drawQuietZones);
         png.WriteScanlines(scanLines);
-#if HAS_SPAN
         ArrayPool<byte>.Shared.Return(scanLines.Array!);
-#endif
         png.WriteEnd();
         return png.GetBytes();
     }
 
-#if !NETSTANDARD1_3
     /// <summary>
     /// Creates a 2-color PNG of the QR code, using 1-bit indexed color. Colors may contain transparency.
     /// </summary>
@@ -55,9 +50,8 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
     /// <param name="lightColor">The color of the light modules.</param>
     /// <param name="drawQuietZones">Indicates if quiet zones around the QR code should be drawn.</param>
     /// <returns>Returns the QR code graphic as a PNG byte array.</returns>
-    public byte[] GetGraphic(int pixelsPerModule, System.Drawing.Color darkColor, System.Drawing.Color lightColor, bool drawQuietZones = true)
-        => GetGraphic(pixelsPerModule, new byte[] { darkColor.R, darkColor.G, darkColor.B, darkColor.A }, new byte[] { lightColor.R, lightColor.G, lightColor.B, lightColor.A }, drawQuietZones);
-#endif
+    public byte[] GetGraphic(int pixelsPerModule, RgbaColor darkColor, RgbaColor lightColor, bool drawQuietZones = true)
+        => GetGraphic(pixelsPerModule, darkColor.ToRgbaBytes(), lightColor.ToRgbaBytes(), drawQuietZones);
 
     /// <summary>
     /// Creates a 2-color PNG of the QR code, using 1-bit indexed color. Accepts 3-byte RGB colors for normal images and 4-byte RGBA-colors for transparent images.
@@ -75,9 +69,7 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
         png.WritePalette(darkColorRgba, lightColorRgba);
         var scanLines = DrawScanlines(pixelsPerModule, drawQuietZones);
         png.WriteScanlines(scanLines);
-#if HAS_SPAN
         ArrayPool<byte>.Shared.Return(scanLines.Array!);
-#endif
         png.WriteEnd();
         return png.GetBytes();
     }
@@ -95,12 +87,8 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
         var quietZoneOffset = (drawQuietZones ? 0 : 4);
         var bytesPerScanline = (matrixSize * pixelsPerModule + 7) / 8 + 1; // A monochrome scanline is one byte for filter type then one bit per pixel.
         var scanLinesLength = bytesPerScanline * matrixSize * pixelsPerModule;
-#if HAS_SPAN
         var scanlines = ArrayPool<byte>.Shared.Rent(scanLinesLength);
         Array.Clear(scanlines, 0, scanLinesLength);
-#else
-        var scanlines = new byte[scanLinesLength];
-#endif
 
         for (var y = 0; y < matrixSize; y++)
         {

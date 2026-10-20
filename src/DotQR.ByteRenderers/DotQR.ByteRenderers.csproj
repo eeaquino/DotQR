@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>DotQR.ByteRenderers</AssemblyName>
+    <RootNamespace>DotQR</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>DotQR.ByteRenderers</PackageId>
+    <PackageTags>c# csharp qr qrcode qr-generator qr-code-generator png bmp pdf svg postscript ascii</PackageTags>
+    <Description>DotQR.ByteRenderers renders QR codes to PNG, BMP, PDF, SVG, PostScript and ASCII with no graphics library dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../DotQR.Core/DotQR.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DotQR.ByteRenderers.Tests" />
+  </ItemGroup>
+
+</Project>

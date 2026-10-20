@@ -1,7 +1,7 @@
-using static QRCoder.QRCodeGenerator;
+using static DotQR.QRCodeGenerator;
 
 /* This renderer is inspired by RemusVasii: https://github.com/Shane32/QRCoder/issues/223 */
-namespace QRCoder;
+namespace DotQR;
 
 
 /// <summary>
@@ -55,13 +55,7 @@ public class PdfByteQRCode : AbstractQRCode, IDisposable
 
         //Create PDF document
         using var stream = new MemoryStream();
-#if NETFRAMEWORK
-        var writer = new StreamWriter(stream, System.Text.Encoding.ASCII);
-#elif NET6_0_OR_GREATER
         var writer = new StreamWriter(stream, System.Text.Encoding.ASCII, leaveOpen: true);
-#else
-        var writer = new StreamWriter(stream, System.Text.Encoding.ASCII, 1024, true);
-#endif
         try
         {
             var xrefs = new List<long>();
@@ -174,9 +168,7 @@ public class PdfByteQRCode : AbstractQRCode, IDisposable
         }
         finally
         {
-#if !NETFRAMEWORK
             writer.Dispose();
-#endif
         }
 
         return stream.ToArray();

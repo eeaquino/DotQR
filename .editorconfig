@@ -80,7 +80,9 @@ dotnet_style_null_propagation = true:error
 
 # .NET code quality settings - Parameter preferences
 # https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-language-conventions?view=vs-2019#parameter-preferences
-dotnet_code_quality_unused_parameters = all:warning
+# Scoped to non-public members: PdfByteQRCode.GetGraphic ships an unused jpgQuality parameter
+# that must stay for binary compatibility, and removing a public parameter is a breaking change.
+dotnet_code_quality_unused_parameters = non_public:warning
 
 # C# code style settings - Implicit and explicit types
 # https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-language-conventions?view=vs-2019#implicit-and-explicit-types
@@ -273,4 +275,10 @@ dotnet_diagnostic.IDE0022.severity = none
 # Converting them would delete validation and newline normalisation, so the rule is disabled for
 # this codebase rather than rewriting correct code to satisfy a false positive.
 dotnet_diagnostic.IDE0032.severity = none
+
+# Mark members as static https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1822
+# Renderer types keep every GetGraphic overload as an instance member for API symmetry with the
+# other renderers, even where a forwarding overload touches no instance state. Applying CA1822 to
+# the public surface would make one overload static and the rest instance.
+dotnet_code_quality.CA1822.api_surface = private, internal
 

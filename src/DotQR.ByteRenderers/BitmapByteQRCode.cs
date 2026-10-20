@@ -1,14 +1,10 @@
-#if HAS_SPAN
 using System.Buffers;
-#endif
-#if NETCOREAPP2_1_OR_GREATER
 using System.Buffers.Binary;
-#endif
 using System.Diagnostics;
 
-using static QRCoder.QRCodeGenerator;
+using static DotQR.QRCodeGenerator;
 
-namespace QRCoder;
+namespace DotQR;
 
 
 /// <summary>
@@ -18,11 +14,7 @@ namespace QRCoder;
 public class BitmapByteQRCode : AbstractQRCode, IDisposable
 {
     // First 32 bytes of a bitmap file header (for 24-bit bitmaps)
-#if HAS_SPAN
     private static ReadOnlySpan<byte> _bitmapHeader =>
-#else
-    private static readonly byte[] _bitmapHeader =
-#endif
     [
         0x42, 0x4D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00
@@ -98,11 +90,7 @@ public class BitmapByteQRCode : AbstractQRCode, IDisposable
         byte[] bmp = new byte[fileSize];
 
         // Header
-#if HAS_SPAN
         _bitmapHeader.CopyTo(bmp);
-#else
-        Array.Copy(_bitmapHeader, 0, bmp, 0, _bitmapHeader.Length);
-#endif
 
         // File size
         CopyIntAs4ByteToArray(fileSize, 2, bmp);
@@ -153,17 +141,7 @@ public class BitmapByteQRCode : AbstractQRCode, IDisposable
     /// <param name="destinationArray">Destination byte array that receives the bytes</param>
     private static void CopyIntAs4ByteToArray(int inp, int destinationIndex, byte[] destinationArray)
     {
-#if NETCOREAPP2_1_OR_GREATER
         BinaryPrimitives.WriteInt32LittleEndian(destinationArray.AsSpan(destinationIndex), inp);
-#else
-        unchecked
-        {
-            destinationArray[destinationIndex + 3] = (byte)(inp >> 24);
-            destinationArray[destinationIndex + 2] = (byte)(inp >> 16);
-            destinationArray[destinationIndex + 1] = (byte)(inp >> 8);
-            destinationArray[destinationIndex + 0] = (byte)(inp);
-        }
-#endif
     }
 }
 
