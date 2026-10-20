@@ -159,6 +159,10 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
 
         private MemoryStream _stream = new MemoryStream();
 
+        // Chunk (typeOffset, dataLength, crcOffset) triples, so GetBytes can compute CRCs over the
+        // recorded ranges instead of re-parsing the whole output stream.
+        private readonly List<(int TypeOffset, int DataLength, int CrcOffset)> _chunks = new();
+
         public void Dispose()
         {
             _stream?.Dispose();
@@ -167,30 +171,21 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
 
         public byte[] GetBytes()
         {
-            var bytes = _stream.ToArray();
+            var length = (int)_stream.Length;
+            var buffer = _stream.GetBuffer();
 
-            // Enumerate chunks in file and insert their CRC32 checksums.
-            var chunkOffset = _pngSignature.Length;
-            while (chunkOffset < bytes.Length)
+            // Fill in the CRC32 reserved at the end of each chunk. The CRC covers the type and data
+            // fields, so it starts at the type offset and spans dataLength + 4 bytes.
+            foreach (var (typeOffset, dataLength, crcOffset) in _chunks)
             {
-                // Read length field.
-                var dataLength = (bytes[chunkOffset] << 24) | (bytes[chunkOffset + 1] << 16) | (bytes[chunkOffset + 2] << 8) | bytes[chunkOffset + 3];
-
-                // CRC is computed from type and data fields.
-                var crc = Crc32(bytes, chunkOffset + 4, dataLength + 4);
-
-                // Write CRC to end of chunk.
-                var crcOffset = chunkOffset + 8 + dataLength;
-                bytes[crcOffset + 0] = (byte)(crc >> 24);
-                bytes[crcOffset + 1] = (byte)(crc >> 16);
-                bytes[crcOffset + 2] = (byte)(crc >> 8);
-                bytes[crcOffset + 3] = (byte)crc;
-
-                // Seek to next chunk.
-                chunkOffset = crcOffset + 4;
+                var crc = Crc32(buffer, typeOffset, dataLength + 4);
+                buffer[crcOffset + 0] = (byte)(crc >> 24);
+                buffer[crcOffset + 1] = (byte)(crc >> 16);
+                buffer[crcOffset + 2] = (byte)(crc >> 8);
+                buffer[crcOffset + 3] = (byte)crc;
             }
 
-            return bytes;
+            return buffer.AsSpan(0, length).ToArray();
         }
 
         /// <summary>
@@ -254,21 +249,30 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
         /// </summary>
         public void WriteScanlines(ArraySegment<byte> scanlines)
         {
-            using var idatStream = new MemoryStream();
-            Deflate(idatStream, scanlines);
-
-            WriteChunkStart(_idat, (int)(idatStream.Length + 6));
+            // Reserve the length field, write the IDAT payload directly, then backfill the length.
+            // This avoids staging the compressed data in an intermediate stream.
+            var lengthOffset = (int)_stream.Position;
+            WriteIntBigEndian(0);
+            var typeOffset = (int)_stream.Position;
+            _stream.Write(_idat, 0, 4);
+            var dataStart = (int)_stream.Position;
 
             // Deflate header.
             _stream.WriteByte(0x78); // 8 Deflate algorithm, 7 max window size
             _stream.WriteByte(0x9C); // Check bits.
 
             // Compressed data.
-            idatStream.WriteTo(_stream);
+            Deflate(_stream, scanlines);
             // Deflate checksum.
             var adler = Adler32(scanlines.Array!, 0, scanlines.Count);
             WriteIntBigEndian(adler);
 
+            var dataLength = (int)_stream.Position - dataStart;
+            _stream.Position = lengthOffset;
+            WriteIntBigEndian((uint)dataLength);
+            _stream.Position = lengthOffset + 4 + 4 + dataLength;
+
+            _chunks.Add((typeOffset, dataLength, -1));
             WriteChunkEnd();
         }
 
@@ -284,14 +288,20 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
         private void WriteChunkStart(byte[] type, int length)
         {
             WriteIntBigEndian((uint)length);
+            var typeOffset = (int)_stream.Position;
             _stream.Write(type, 0, 4);
+            _chunks.Add((typeOffset, length, -1));
         }
 
         private void WriteChunkEnd()
         {
             // Reserves 4 bytes space for crc32 so GetBytes can add it later.
+            var crcOffset = (int)_stream.Position;
             _stream.SetLength(_stream.Length + 4);
             _stream.Position += 4;
+
+            var last = _chunks.Count - 1;
+            _chunks[last] = (_chunks[last].TypeOffset, _chunks[last].DataLength, crcOffset);
         }
 
         private void WriteIntBigEndian(uint value)
@@ -308,31 +318,77 @@ public sealed class PngByteQRCode : AbstractQRCode, IDisposable
             deflateStream.Write(bytes.Array!, 0, bytes.Count);
         }
 
-        // Reference implementation from RFC 1950. Not optimized.
+        // Largest block for which the running sums cannot overflow 32 bits, per RFC 1950: the
+        // modulo is deferred to one reduction per block instead of two per byte.
+        private const int ADLER_BLOCK_SIZE = 5552;
+
         private static uint Adler32(byte[] data, int index, int length)
         {
             const uint Base = 65521;
             uint s1 = 1, s2 = 0;
 
             var end = index + length;
-            for (var n = index; n < end; n++)
+            while (index < end)
             {
-                s1 = (s1 + data[n]) % Base;
-                s2 = (s2 + s1) % Base;
+                var blockEnd = Math.Min(index + ADLER_BLOCK_SIZE, end);
+                for (; index < blockEnd; index++)
+                {
+                    s1 += data[index];
+                    s2 += s1;
+                }
+
+                s1 %= Base;
+                s2 %= Base;
             }
 
             return (s2 << 16) + s1;
         }
 
-        // Reference implementation from REC-PNG-20031110. Not optimized.
+        /// <summary>
+        /// Slicing-by-8 CRC-32 table, derived from <see cref="_crcTable"/> at first use.
+        /// </summary>
+        private static readonly uint[] _crcTable8 = BuildCrcTable8();
+
+        private static uint[] BuildCrcTable8()
+        {
+            var table = new uint[8 * 256];
+            Array.Copy(_crcTable, table, 256);
+            for (var row = 1; row < 8; row++)
+            {
+                for (var i = 0; i < 256; i++)
+                {
+                    var previous = table[((row - 1) * 256) + i];
+                    table[(row * 256) + i] = _crcTable[previous & 0xFF] ^ (previous >> 8);
+                }
+            }
+
+            return table;
+        }
+
         private static uint Crc32(byte[] data, int index, int length)
         {
-            var c = 0xffffffff;
-
+            var c = 0xffffffffu;
+            var table = _crcTable8;
             var end = index + length;
-            for (var n = index; n < end; n++)
+
+            while (end - index >= 8)
             {
-                c = _crcTable[(c ^ data[n]) & 0xff] ^ (c >> 8);
+                var one = (uint)(data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24)) ^ c;
+                var two = (uint)(data[index + 4] | (data[index + 5] << 8) | (data[index + 6] << 16) | (data[index + 7] << 24));
+                c = table[(7 * 256) + (int)(one & 0xFF)]
+                  ^ table[(6 * 256) + (int)((one >> 8) & 0xFF)]
+                  ^ table[(5 * 256) + (int)((one >> 16) & 0xFF)]
+                  ^ table[(4 * 256) + (int)(one >> 24)]
+                  ^ table[(3 * 256) + (int)(two & 0xFF)]
+                  ^ table[(2 * 256) + (int)((two >> 8) & 0xFF)]
+                  ^ table[(1 * 256) + (int)((two >> 16) & 0xFF)]
+                  ^ table[(int)(two >> 24)];
+                index += 8;
+            }
+
+            for (; index < end; index++)
+            {
+                c = _crcTable[(int)((c ^ data[index]) & 0xFF)] ^ (c >> 8);
             }
 
             return c ^ 0xffffffff;
