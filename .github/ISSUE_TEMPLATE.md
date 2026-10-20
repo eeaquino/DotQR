@@ -3,8 +3,8 @@ Thanks for helping us. Feel free to use/edit the template below for your issue/r
 Use "Preview" to view your issue before posting.
 
 Note: Your issue may already be reported!
-Please search on the issue track before creating a new one:
-https://github.com/codebude/QRCoder/issues?utf8=%E2%9C%93&q=
+Please search the issue tracker before creating a new one.
+
 -->
 
 ## Type of issue
@@ -45,5 +45,5 @@ Include as many relevant details about the environment you experienced the bug i
 * Used payload generator:  
 * Used ECC-level:  
 * Used renderer class:  
-* Environment (.NET 3.5, .NET 4.X, .NETCore, ...):  
+* Environment (.NET version, OS, architecture):  
 -->

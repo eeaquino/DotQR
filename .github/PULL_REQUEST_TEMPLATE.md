@@ -2,7 +2,7 @@
 Thanks for submitting a pull request! Please provide enough information so that others can review your pull request.
 
 A similar PR may already be submitted!
-Please search among the Pull request before creating one: https://github.com/codebude/QRCoder/pulls?utf8=%E2%9C%93&q=
+Please search the existing pull requests before creating one.
 
 For more information, see the `CONTRIBUTING` guide.-->
 
