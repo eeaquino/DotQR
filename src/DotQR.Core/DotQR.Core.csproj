@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>DotQR.Core</AssemblyName>
+    <RootNamespace>DotQR</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>DotQR.Core</PackageId>
+    <PackageTags>c# csharp qr qrcode qr-generator qr-code-generator</PackageTags>
+    <Description>DotQR.Core generates QR code module data. It has no graphics dependencies; pair it with DotQR.ByteRenderers, DotQR.SkiaSharp, or your own renderer.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DotQR.Core.Tests" />
+  </ItemGroup>
+
+</Project>
