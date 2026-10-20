@@ -39,7 +39,6 @@ TYPE DotQR.QRCode [class] : DotQR.AbstractQRCode
   CTOR (DotQR.QRCodeData data)
   METHOD GetGraphic(System.Int32 pixelsPerModule) : SkiaSharp.SKBitmap
   METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKBitmap icon = null, System.Int32 iconSizePercent = 15, System.Int32 iconBorderWidth = 0, System.Boolean drawQuietZones = true, Nullable<SkiaSharp.SKColor> iconBackgroundColor = null) : SkiaSharp.SKBitmap
-  METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, System.Boolean drawQuietZones = true) : SkiaSharp.SKBitmap
   METHOD GetGraphic(System.Int32 pixelsPerModule, System.String darkColorHtmlHex, System.String lightColorHtmlHex, System.Boolean drawQuietZones = true) : SkiaSharp.SKBitmap
 
 TYPE DotQR.QRCodeHelper [static class]

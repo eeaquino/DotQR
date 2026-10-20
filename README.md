@@ -69,10 +69,11 @@ using var data = generator.CreateQrCode("https://example.com", QRCodeGenerator.E
 using var bitmap = new QRCode(data).GetGraphic(10);
 ```
 
-Passing colors requires naming `icon`, because both `GetGraphic` overloads end in a `bool`:
+Passing colors is unambiguous; name `drawQuietZones` or `icon` only when you need them:
 
 ```csharp
-using var colored = new QRCode(data).GetGraphic(10, SKColors.DarkSlateGray, SKColors.White, icon: null);
+using var colored = new QRCode(data).GetGraphic(10, SKColors.DarkSlateGray, SKColors.White);
+using var trimmed = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, drawQuietZones: false);
 ```
 
 Artistic rendering with round module dots, and base64 output for embedding in HTML or JSON:
@@ -98,6 +99,17 @@ bool dark = modules[y][x];
 
 `GetRawData(QRCodeData.Compression.Uncompressed)` serialises the matrix for caching or transport,
 and `new QRCodeData(bytes, compression)` restores it.
+
+### Micro QR codes
+
+Micro QR codes use a separate entry point that accepts explicit versions `-1` to `-4` (M1 to M4):
+
+```csharp
+// M2 with byte mode is invalid - M2 supports only numeric and alphanumeric data.
+using var micro = QRCodeGenerator.GenerateMicroQrCode("12345", QRCodeGenerator.ECCLevel.L, requestedVersion: -2);
+```
+
+`CreateQrCode` rejects negative versions other than `-1`; it only produces standard QR codes.
 
 ## Payload generators
 
@@ -139,6 +151,13 @@ This is a deliberate rewrite of the rendering layer, not a drop-in replacement.
   extension in `DotQR.SkiaSharp`.
 - **`net10.0` only.** Multi-targeting was dropped.
 - **Assembly names changed.** Update `using QRCoder;` to `using DotQR;`.
+- **`QRCode.GetGraphic` has a single color overload.** QRCoder had two that both ended in an
+  optional `bool`, so every call passing two colors failed to compile as ambiguous. Color, quiet
+  zone and icon options are now all on one overload.
+- **Invalid versions are rejected clearly.** `CreateQrCode` throws `ArgumentOutOfRangeException`
+  for a `requestedVersion` outside `-1` and `1`-`40`. It previously surfaced an unrelated
+  `KeyNotFoundException` for Micro version numbers, which standard QR generation cannot produce;
+  use `GenerateMicroQrCode` for those.
 
 ## Building and testing
 

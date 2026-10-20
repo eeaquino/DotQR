@@ -27,7 +27,7 @@ public class QRCode : AbstractQRCode, IDisposable
     /// <param name="pixelsPerModule">The number of pixels each dark/light module of the QR code will occupy in the final QR code image.</param>
     /// <returns>Returns the QR code graphic as a bitmap.</returns>
     public SKBitmap GetGraphic(int pixelsPerModule)
-        => GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
+        => GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, icon: null, drawQuietZones: true);
 
     /// <summary>
     /// Creates a colored bitmap image of the QR code.
@@ -42,22 +42,17 @@ public class QRCode : AbstractQRCode, IDisposable
             pixelsPerModule,
             RgbaColor.Parse(darkColorHtmlHex).ToSKColor(),
             RgbaColor.Parse(lightColorHtmlHex).ToSKColor(),
-            drawQuietZones);
-
-    /// <summary>
-    /// Creates a colored bitmap image of the QR code.
-    /// </summary>
-    /// <param name="pixelsPerModule">The number of pixels each dark/light module of the QR code will occupy in the final QR code image.</param>
-    /// <param name="darkColor">The color of the dark modules.</param>
-    /// <param name="lightColor">The color of the light modules.</param>
-    /// <param name="drawQuietZones">Indicates if quiet zones around the QR code should be drawn.</param>
-    /// <returns>Returns the QR code graphic as a bitmap.</returns>
-    public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, bool drawQuietZones = true)
-        => GetGraphic(pixelsPerModule, darkColor, lightColor, null, 0, 0, drawQuietZones, null);
+            icon: null,
+            drawQuietZones: drawQuietZones);
 
     /// <summary>
     /// Creates a colored bitmap image of the QR code with an optional icon in the center.
     /// </summary>
+    /// <remarks>
+    /// This is the only overload that accepts <see cref="SKColor"/> values. A shorter
+    /// "pixels, dark, light, drawQuietZones" overload used to exist and made every call that passed
+    /// two colors ambiguous, because both overloads ended in an optional boolean.
+    /// </remarks>
     /// <param name="pixelsPerModule">The number of pixels each dark/light module of the QR code will occupy in the final QR code image.</param>
     /// <param name="darkColor">The color of the dark modules.</param>
     /// <param name="lightColor">The color of the light modules.</param>

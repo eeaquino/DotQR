@@ -81,7 +81,7 @@ public class Base64QRCode : AbstractQRCode, IDisposable
             return Convert.ToBase64String(pngData, Base64FormattingOptions.None);
         }
 
-        using var bitmap = new QRCode(QrCodeData).GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones);
+        using var bitmap = new QRCode(QrCodeData).GetGraphic(pixelsPerModule, darkColor, lightColor, icon: null, drawQuietZones: drawQuietZones);
         return ImageToBase64(bitmap, imgType);
     }
 

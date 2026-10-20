@@ -28,7 +28,7 @@ public class QRCodeRendererTests
     {
         var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
-        var bmp = new QRCode(data).GetGraphic(5, SKColors.Black, SKColors.White, false);
+        var bmp = new QRCode(data).GetGraphic(5, SKColors.Black, SKColors.White, drawQuietZones: false);
         bmp.ShouldMatchApproved();
     }
 
