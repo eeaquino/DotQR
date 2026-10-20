@@ -1,9 +1,7 @@
-#if !NETSTANDARD1_3
-using System.Drawing;
 using System.Text;
-using static QRCoder.QRCodeGenerator;
+using static DotQR.QRCodeGenerator;
 
-namespace QRCoder;
+namespace DotQR;
 
 /// <summary>
 /// Represents a QR code generator that outputs QR codes as PostScript code.
@@ -31,7 +29,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     public string GetGraphic(int pointsPerModule, bool epsFormat = false)
     {
         var viewBox = new Size(pointsPerModule * QrCodeData.ModuleMatrix.Count, pointsPerModule * QrCodeData.ModuleMatrix.Count);
-        return GetGraphic(viewBox, Color.Black, Color.White, true, epsFormat);
+        return GetGraphic(viewBox, RgbaColor.Black, RgbaColor.White, true, epsFormat);
     }
 
     /// <summary>
@@ -43,7 +41,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     /// <param name="drawQuietZones">Indicates if quiet zones around the QR code should be drawn.</param>
     /// <param name="epsFormat">Indicates if the output should be in EPS format.</param>
     /// <returns>Returns the QR code graphic as a PostScript string.</returns>
-    public string GetGraphic(int pointsPerModule, Color darkColor, Color lightColor, bool drawQuietZones = true, bool epsFormat = false)
+    public string GetGraphic(int pointsPerModule, RgbaColor darkColor, RgbaColor lightColor, bool drawQuietZones = true, bool epsFormat = false)
     {
         var viewBox = new Size(pointsPerModule * QrCodeData.ModuleMatrix.Count, pointsPerModule * QrCodeData.ModuleMatrix.Count);
         return GetGraphic(viewBox, darkColor, lightColor, drawQuietZones, epsFormat);
@@ -72,7 +70,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     /// <param name="epsFormat">Indicates if the output should be in EPS format.</param>
     /// <returns>Returns the QR code graphic as a PostScript string.</returns>
     public string GetGraphic(Size viewBox, bool drawQuietZones = true, bool epsFormat = false)
-        => GetGraphic(viewBox, Color.Black, Color.White, drawQuietZones, epsFormat);
+        => GetGraphic(viewBox, RgbaColor.Black, RgbaColor.White, drawQuietZones, epsFormat);
 
     /// <summary>
     /// Creates a colored PostScript code representation of the QR code.
@@ -84,7 +82,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     /// <param name="epsFormat">Indicates if the output should be in EPS format.</param>
     /// <returns>Returns the QR code graphic as a PostScript string.</returns>
     public string GetGraphic(Size viewBox, string darkColorHex, string lightColorHex, bool drawQuietZones = true, bool epsFormat = false)
-        => GetGraphic(viewBox, ColorTranslator.FromHtml(darkColorHex), ColorTranslator.FromHtml(lightColorHex), drawQuietZones, epsFormat);
+        => GetGraphic(viewBox, RgbaColor.Parse(darkColorHex), RgbaColor.Parse(lightColorHex), drawQuietZones, epsFormat);
 
     /// <summary>
     /// Creates a colored PostScript code representation of the QR code.
@@ -95,7 +93,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     /// <param name="drawQuietZones">Indicates if quiet zones around the QR code should be drawn.</param>
     /// <param name="epsFormat">Indicates if the output should be in EPS format.</param>
     /// <returns>Returns the QR code graphic as a PostScript string.</returns>
-    public string GetGraphic(Size viewBox, Color darkColor, Color lightColor, bool drawQuietZones = true, bool epsFormat = false)
+    public string GetGraphic(Size viewBox, RgbaColor darkColor, RgbaColor lightColor, bool drawQuietZones = true, bool epsFormat = false)
     {
         var offset = drawQuietZones ? 0 : 4;
         var drawableModulesCount = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : offset * 2);
@@ -148,7 +146,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     // Standard PostScript header — includes media/page setup and setpagedevice (valid for standalone PS documents).
     private const string PS_HEADER = """
         %!PS-Adobe-3.0
-        %%Creator: QRCoder.NET
+        %%Creator: DotQR.NET
         %%Title: QRCode
         %%DocumentData: Clean7Bit
         %%Origin: 0
@@ -173,7 +171,7 @@ public class PostscriptQRCode : AbstractQRCode, IDisposable
     // Constants (sz, sc) and procedure definitions are emitted in EPS_FUNCTIONS below.
     private const string EPS_HEADER = """
         %!PS-Adobe-3.0 EPSF-3.0
-        %%Creator: QRCoder.NET
+        %%Creator: DotQR.NET
         %%Title: QRCode
         %%DocumentData: Clean7Bit
         %%BoundingBox: 0 0 {0} {0}
@@ -312,4 +310,3 @@ public static class PostscriptQRCodeHelper
         return qrCode.GetGraphic(pointsPerModule, darkColorHex, lightColorHex, drawQuietZones, epsFormat);
     }
 }
-#endif
