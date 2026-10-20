@@ -88,8 +88,10 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             }
         }
 
-        // Accumulate the dots into two paths and paint each once, rather than issuing one draw call
-        // per module.
+        // Accumulate the dots into paths and paint each once, rather than issuing one draw call
+        // per module. Light dots are only worth building when they differ from the background;
+        // when the colors match, painting them is a no-op.
+        var drawLightDots = lightColor != backgroundColor;
         using var lightBuilder = new SKPathBuilder();
         using var darkBuilder = new SKPathBuilder();
         var radius = pixelSize / 2f;
@@ -109,7 +111,7 @@ public class ArtQRCode : AbstractQRCode, IDisposable
                         flatPaint.Color = pixelIsDark ? darkColor : lightColor;
                         canvas.DrawRect(rectangle, flatPaint);
                     }
-                    else if (pixelSize > 0)
+                    else if (pixelSize > 0 && (pixelIsDark || drawLightDots))
                     {
                         var builder = pixelIsDark ? darkBuilder : lightBuilder;
                         builder.AddCircle(x * pixelsPerModule + centre, y * pixelsPerModule + centre, radius, SKPathDirection.Clockwise);
@@ -123,8 +125,9 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             }
         }
 
-        using (var lightPath = lightBuilder.Detach())
+        if (drawLightDots)
         {
+            using var lightPath = lightBuilder.Detach();
             dotPaint.Color = lightColor;
             canvas.DrawPath(lightPath, dotPaint);
         }
