@@ -4,7 +4,7 @@ namespace DotQR;
 
 public partial class QRCodeGenerator
 {
-    private static partial class ModulePlacer
+    internal static partial class ModulePlacer
     {
         /// <summary>
         /// Places the version information on the QR code matrix for versions 7 and higher. Version information
@@ -209,7 +209,7 @@ public partial class QRCodeGenerator
                 var pattern = MaskPattern.Patterns[maskPattern];
                 pattern.Apply(copy, blockedModules);
 
-                int score = version < 0 ? copy.ScoreMicro() : copy.Score();
+                int score = version < 0 ? copy.ScoreMicro() : copy.Score(patternScore);
 
                 // Select the pattern with the lowest score, indicating better QR code readability.
                 if (patternScore > score)

@@ -7,7 +7,7 @@ namespace DotQR;
 
 public partial class QRCodeGenerator
 {
-    private sealed class ModuleMatrix : IDisposable
+    internal sealed class ModuleMatrix : IDisposable
     {
         public byte[] Bytes { get; }
         public int Size { get; }
@@ -178,8 +178,15 @@ public partial class QRCodeGenerator
         /// A lower score indicates a QR code that is easier for decoders to read accurately.
         /// The score is the sum of four penalty rules applied to the QR code.
         /// </summary>
-        /// <returns>The total penalty score of the QR code.</returns>
-        public int Score()
+        /// <remarks>
+        /// Every penalty term is non-negative, so once the running total exceeds
+        /// <paramref name="abortAt"/> the candidate can no longer win. An abandoned scan returns a
+        /// partial total greater than <paramref name="abortAt"/>; callers only need the returned
+        /// value to rank candidates, never the true score of a losing mask.
+        /// </remarks>
+        /// <param name="abortAt">The threshold above which the scan may stop early.</param>
+        /// <returns>The total penalty score, or a partial value greater than <paramref name="abortAt"/> when abandoned.</returns>
+        public int Score(int abortAt)
         {
             int score = 0;
             int blackModules = 0;
@@ -189,6 +196,9 @@ public partial class QRCodeGenerator
             // Penalty 1: Penalty for groups of five or more same-color modules in a row (or column)
             for (int i = 0; i < size; i++)
             {
+                if ((i & 7) == 0 && score > abortAt)
+                    return score;
+
                 var row = GetRow(i);
                 var column = GetColumn(i);
 
@@ -245,9 +255,15 @@ public partial class QRCodeGenerator
             int nextMultipleOf5 = Math.Abs(percentDiv5 - 9);
             score += Math.Min(prevMultipleOf5, nextMultipleOf5) * 10;
 
+            if (score > abortAt)
+                return score;
+
             // Penalty 2: Penalty for square blocks of four modules in the same color
             for (int y = 0; y < size - 1; y++)
             {
+                if ((y & 7) == 0 && score > abortAt)
+                    return score;
+
                 var currentRow = GetRow(y);
                 var nextRow = GetRow(y + 1);
 
@@ -271,6 +287,9 @@ public partial class QRCodeGenerator
             // Penalty 3: Penalty for specific patterns within the QR code (patterns that should be avoided)
             for (int i = 0; i < size; i++)
             {
+                if ((i & 7) == 0 && score > abortAt)
+                    return score;
+
                 // Horizontal pattern matching
                 var r = GetRow(i);
 
@@ -316,6 +335,12 @@ public partial class QRCodeGenerator
 
             return score;
         }
+
+        /// <summary>
+        /// Calculates the total penalty score without early termination.
+        /// </summary>
+        /// <returns>The total penalty score of the QR code.</returns>
+        public int Score() => Score(int.MaxValue);
 
         public void Dispose()
         {

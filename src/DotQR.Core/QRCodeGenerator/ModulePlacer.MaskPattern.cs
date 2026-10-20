@@ -4,13 +4,13 @@ namespace DotQR;
 
 public partial class QRCodeGenerator
 {
-    private static partial class ModulePlacer
+    internal static partial class ModulePlacer
     {
         /// <summary>
         /// Provides the data to handle mask patterns used in QR code generation.
         /// Mask patterns are applied to QR codes to break up patterns in the data matrix that might confuse scanners.
         /// </summary>
-        private readonly struct MaskPattern
+        internal readonly struct MaskPattern
         {
             /// <summary>
             /// An array mapping each mask pattern index to its corresponding pattern that determines whether a given pixel should be masked.

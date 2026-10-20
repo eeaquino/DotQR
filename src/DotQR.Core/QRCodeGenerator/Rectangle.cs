@@ -7,7 +7,7 @@ public partial class QRCodeGenerator
     /// <summary>
     /// Represents a rectangle defined by its top-left corner's coordinates, width, and height.
     /// </summary>
-    private readonly struct Rectangle
+    internal readonly struct Rectangle
     {
         /// <summary>
         /// Gets the X-coordinate of the top-left corner of the rectangle.
