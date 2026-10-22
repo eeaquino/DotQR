@@ -29,7 +29,7 @@
         try
         {
             var file = e.File;
-            await using var stream = file.OpenReadStream(GenerationLimits.MaxUploadBytes, _lifetime.Token);
+            await using var stream = file.OpenReadStream(GenerationLimits.MAX_UPLOAD_BYTES, _lifetime.Token);
             var bytes = await UploadImageReader.ReadAsync(stream, file.Size, _lifetime.Token);
             if (!_disposed) await Changed.InvokeAsync(new(bytes, null, false));
         }

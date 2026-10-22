@@ -26,31 +26,37 @@ public sealed class LiveGenerationCoordinator : IAsyncDisposable
         do
         {
             previous = Volatile.Read(ref _state);
-            if (previous.Disposed) return;
+            if (previous.Disposed)
+                return;
         } while (!ReferenceEquals(Interlocked.CompareExchange(ref _state, rejected, previous), previous));
         Changed?.Invoke();
     }
 
     public async Task SubmitAsync(GenerationRequest request, bool immediate = false)
     {
-        if (Volatile.Read(ref _state).Disposed) return;
+        if (Volatile.Read(ref _state).Disposed)
+            return;
         var snapshot = request.Snapshot();
         var state = new State(null, true);
         State previous;
         do
         {
             previous = Volatile.Read(ref _state);
-            if (previous.Disposed) return;
+            if (previous.Disposed)
+                return;
         } while (!ReferenceEquals(Interlocked.CompareExchange(ref _state, state, previous), previous));
         Changed?.Invoke();
         var token = _token;
         try
         {
-            if (!immediate) await Task.Delay(TimeSpan.FromMilliseconds(250), _timeProvider, token);
-            if (!ReferenceEquals(Volatile.Read(ref _state), state)) return;
+            if (!immediate)
+                await Task.Delay(TimeSpan.FromMilliseconds(250), _timeProvider, token);
+            if (!ReferenceEquals(Volatile.Read(ref _state), state))
+                return;
             var outcome = await _generate(snapshot, token);
             var completed = new State(outcome, false);
-            if (ReferenceEquals(Interlocked.CompareExchange(ref _state, completed, state), state)) Changed?.Invoke();
+            if (ReferenceEquals(Interlocked.CompareExchange(ref _state, completed, state), state))
+                Changed?.Invoke();
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
@@ -62,7 +68,8 @@ public sealed class LiveGenerationCoordinator : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var previous = Interlocked.Exchange(ref _state, new(null, false, true));
-        if (previous.Disposed) return;
+        if (previous.Disposed)
+            return;
         Changed = null;
         await _lifetime.CancelAsync();
         _lifetime.Dispose();

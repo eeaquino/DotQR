@@ -4,7 +4,7 @@ public static partial class PayloadCatalog
 {
     public static IReadOnlyList<PayloadDefinition> All { get; } = Build();
 
-    private static IReadOnlyList<PayloadDefinition> Build()
+    private static System.Collections.ObjectModel.ReadOnlyCollection<PayloadDefinition> Build()
     {
         List<PayloadDefinition> definitions =
         [
@@ -24,7 +24,8 @@ public static partial class PayloadCatalog
     {
         var definition = All.Single(p => p.Id == id);
         var values = new PayloadValues();
-        foreach (var field in definition.Fields) values[field.Key] = field.Example ?? "";
+        foreach (var field in definition.Fields)
+            values[field.Key] = field.Example ?? "";
         return values;
     }
 

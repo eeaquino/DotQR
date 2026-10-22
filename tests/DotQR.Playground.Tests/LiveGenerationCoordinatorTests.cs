@@ -5,14 +5,15 @@ namespace DotQR.Playground.Tests;
 public sealed class LiveGenerationCoordinatorTests
 {
     [Fact]
-    public async Task OlderResultCannotReplaceNewerResult()
+    public async Task OlderResultCannotReplaceNewerResultAsync()
     {
         var first = new TaskCompletionSource<GenerationOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var calls = 0;
         await using var coordinator = new LiveGenerationCoordinator((_, _) =>
         {
-            if (Interlocked.Increment(ref calls) == 1) { started.SetResult(); return first.Task; }
+            if (Interlocked.Increment(ref calls) == 1)
+            { started.SetResult(); return first.Task; }
             return Task.FromResult(new GenerationOutcome(null, "newest"));
         }, TimeProvider.System);
         var older = coordinator.SubmitAsync(QrGenerationServiceTests.Request(), true);
@@ -25,7 +26,7 @@ public sealed class LiveGenerationCoordinatorTests
     }
 
     [Fact]
-    public async Task InvalidEditorValueInvalidatesPendingRender()
+    public async Task InvalidEditorValueInvalidatesPendingRenderAsync()
     {
         var pending = new TaskCompletionSource<GenerationOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
         await using var coordinator = new LiveGenerationCoordinator((_, _) => pending.Task, TimeProvider.System);
@@ -38,7 +39,7 @@ public sealed class LiveGenerationCoordinatorTests
     }
 
     [Fact]
-    public async Task SubmissionInvalidatesCurrentOutputImmediately()
+    public async Task SubmissionInvalidatesCurrentOutputImmediatelyAsync()
     {
         var clock = new ManualTimeProvider();
         await using var coordinator = new LiveGenerationCoordinator((_, _) => Task.FromResult(new GenerationOutcome(null, "invalid")), clock);
@@ -52,7 +53,7 @@ public sealed class LiveGenerationCoordinatorTests
     }
 
     [Fact]
-    public async Task TextChangesCoalesceAndDisposalSuppressesPublication()
+    public async Task TextChangesCoalesceAndDisposalSuppressesPublicationAsync()
     {
         var clock = new ManualTimeProvider();
         var calls = 0;
@@ -81,7 +82,8 @@ internal sealed class ManualTimeProvider : TimeProvider
     }
     internal void Advance()
     {
-        foreach (var timer in _timers.ToArray()) timer.Fire();
+        foreach (var timer in _timers.ToArray())
+            timer.Fire();
         _timers.Clear();
     }
     private sealed class ManualTimer(TimerCallback callback, object? state) : ITimer

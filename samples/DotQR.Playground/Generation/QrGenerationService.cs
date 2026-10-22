@@ -5,6 +5,11 @@ namespace DotQR.Playground.Generation;
 
 public sealed class QrGenerationService(ILogger<QrGenerationService> logger)
 {
+    static QrGenerationService()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
     public GenerationOutcome Generate(GenerationRequest request)
     {
         try
@@ -14,19 +19,26 @@ public sealed class QrGenerationService(ILogger<QrGenerationService> logger)
             var text = payload?.ToString() ?? request.Values.Text("text");
             GenerationLimits.ValidateText(text);
             var encoding = request.Encoding;
-            if (encoding.IsMicro && request.Definition.Id != "text") throw new ArgumentException("Micro QR is available for plain text only.");
-            if (encoding.IsMicro && request.Renderer.Kind == RendererKind.Art) throw new ArgumentException("ArtQRCode assumes standard QR finder patterns. Choose another renderer for Micro QR.");
-            if (encoding.IsMicro && encoding.Version is < -4 or > -1) throw new ArgumentException("Choose Micro version M1–M4.");
-            if (!encoding.IsMicro && encoding.Version is not (-1 or >= 1 and <= 40)) throw new ArgumentException("Choose automatic version or standard version 1–40.");
+            if (encoding.IsMicro && request.Definition.Id != "text")
+                throw new ArgumentException("Micro QR is available for plain text only.");
+            if (encoding.IsMicro && request.Renderer.Kind == RendererKind.Art)
+                throw new ArgumentException("ArtQRCode assumes standard QR finder patterns. Choose another renderer for Micro QR.");
+            if (encoding.IsMicro && encoding.Version is < -4 or > -1)
+                throw new ArgumentException("Choose Micro version M1–M4.");
+            if (!encoding.IsMicro && encoding.Version is not (-1 or >= 1 and <= 40))
+                throw new ArgumentException("Choose automatic version or standard version 1–40.");
             using var generator = new QRCodeGenerator();
-            using var data = CreateData(generator, payload, text, encoding, out var effective);
+            using var data = payload is P.Girocode
+                ? GirocodeEncodingPolicy.Generate(generator, text, request.Values.Enum<P.Girocode.GirocodeEncoding>("encoding"), encoding.Version, out var effective)
+                : CreateData(generator, payload, text, encoding, out effective);
             var version = data.Version;
             var count = data.ModuleMatrix.Count;
             GenerationLimits.Validate(request.Renderer, count);
             var rendered = request.Renderer.Kind is RendererKind.Skia or RendererKind.Art or RendererKind.Base64
                 ? SkiaRendererService.Render(data, request.Renderer)
                 : ByteRendererService.Render(data, request.Renderer);
-            if (rendered.Content.Length > GenerationLimits.MaxOutputBytes) throw new ArgumentException("Output exceeds 16 MiB. Reduce size or renderer complexity.");
+            if (rendered.Content.Length > GenerationLimits.MAX_OUTPUT_BYTES)
+                throw new ArgumentException("Output exceeds 16 MiB. Reduce size or renderer complexity.");
             return new(new(rendered.Content, rendered.FileName, rendered.MimeType, rendered.PreviewDataUri, rendered.TextPreview,
                 text, version, count, effective, rendered.PreviewNotice), null);
         }
@@ -37,7 +49,7 @@ public sealed class QrGenerationService(ILogger<QrGenerationService> logger)
         catch (Exception ex)
         {
             // Payload exceptions may contain sensitive values. Log only the type, never the exception/message.
-            logger.LogError("QR generation failed ({ErrorType}); payload content was not logged.", ex.GetType().Name);
+            PlaygroundLog.GenerationFailed(logger, ex.GetType().Name);
             return new(null, "QR generation failed. Check the selected settings and native SkiaSharp setup, then try again.");
         }
     }

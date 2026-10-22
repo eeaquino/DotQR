@@ -6,7 +6,8 @@
     </select>
     @if (Locked) { <p class="notice">This payment payload controls version, ECC, and ECI. Effective settings are shown with the preview.</p> }
     @if (BinaryPayment) { <p class="notice">Russian payments encode exact payload bytes in the selected character set. Version is automatic; UTF-8 and ECI controls do not apply.</p> }
-    <fieldset disabled="@(Locked || BinaryPayment)">
+    @if (Girocode) { <p class="notice">Girocode requires ECC M and its payload character set. UTF-8 / ISO-8859-1 / ISO-8859-2 support fixed QR versions; other sets use exact binary bytes with automatic version. Generic UTF-8/BOM/ECI controls do not apply.</p> }
+    <fieldset disabled="@(Locked || BinaryPayment || GirocodeBinary)">
         <label for="qr-version">Version</label>
         <select id="qr-version" value="@Options.Version" @onchange="VersionChanged">
             @if (Options.IsMicro)
@@ -20,9 +21,9 @@
             }
         </select>
     </fieldset>
-    <fieldset disabled="@Locked">
+    <fieldset disabled="@(Locked || Girocode)">
         <label for="qr-ecc">Error correction</label>
-        <select id="qr-ecc" value="@Options.EccLevel" @onchange="EccChanged">
+        <select id="qr-ecc" value="@(Locked || Girocode ? QRCodeGenerator.ECCLevel.M : Options.EccLevel)" @onchange="EccChanged">
             @foreach (var level in EccChoices) { <option value="@level">@level</option> }
         </select>
     </fieldset>
@@ -32,7 +33,7 @@
     }
     else
     {
-        <fieldset disabled="@(Locked || BinaryPayment)">
+        <fieldset disabled="@(Locked || BinaryPayment || Girocode)">
             <label for="qr-eci">ECI mode</label>
             <select id="qr-eci" value="@Options.EciMode" @onchange="EciChanged">
                 @foreach (var mode in Enum.GetValues<QRCodeGenerator.EciMode>()) { <option value="@mode">@mode</option> }
@@ -47,6 +48,8 @@
     [Parameter, EditorRequired] public EncodingOptions Options { get; set; } = default!;
     [Parameter] public bool Locked { get; set; }
     [Parameter] public bool BinaryPayment { get; set; }
+    [Parameter] public bool Girocode { get; set; }
+    [Parameter] public bool GirocodeBinary { get; set; }
     [Parameter] public EventCallback<EncodingOptions> Changed { get; set; }
     private IEnumerable<QRCodeGenerator.ECCLevel> EccChoices => !Options.IsMicro
         ? [QRCodeGenerator.ECCLevel.L, QRCodeGenerator.ECCLevel.M, QRCodeGenerator.ECCLevel.Q, QRCodeGenerator.ECCLevel.H]

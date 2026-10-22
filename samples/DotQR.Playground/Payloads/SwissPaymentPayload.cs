@@ -9,7 +9,7 @@ public static partial class PayloadCatalog
         List<PayloadField> fields =
         [
             Text("iban", "IBAN", "CH2609000000857666015", true), Choice("ibanType", "IBAN type", S.Iban.IbanType.Iban), Choice("currency", "Currency", S.Currency.CHF),
-            Text("amount", "Amount", "12.50", kind: FieldKind.Decimal), Choice("referenceType", "Reference type", S.Reference.ReferenceType.NON),
+            Text("amount", "Amount", "12.50", kind: FieldKind.FractionalNumber), Choice("referenceType", "Reference type", S.Reference.ReferenceType.NON),
             Text("reference", "Reference", "RF18539007547034", visible: v => v.Text("referenceType") != "NON"),
             Choice("referenceTextType", "Reference text type", S.Reference.ReferenceTextType.CreditorReferenceIso11649, v => v.Text("referenceType") != "NON"),
             Text("message", "Unstructured message", "Example only"), Text("billInformation", "Bill information"),

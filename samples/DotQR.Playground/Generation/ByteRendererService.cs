@@ -47,7 +47,7 @@ internal static class ByteRendererService
                     return RenderedOutput.Text(ps, o.EpsFormat ? "eps" : "ps", "application/postscript");
                 }
             case RendererKind.Ascii:
-                using (var qr = new ASCIIQRCode(data))
+                using (var qr = new AsciiQRCode(data))
                     return RenderedOutput.Text(o.Compact ? qr.GetGraphicSmall(o.DrawQuietZones, o.Invert, o.EndOfLine)
                         : qr.GetGraphic(o.RepeatPerModule, o.DarkColorString, o.WhiteSpaceString, o.DrawQuietZones, o.EndOfLine), "txt", "text/plain;charset=utf-8");
             default:

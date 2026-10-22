@@ -29,6 +29,13 @@ public sealed class GenerationLimitsTests
         GenerationLimits.Validate(new RendererOptions { Kind = RendererKind.Art, PixelSizeFactor = factor }, 29));
 
     [Fact]
+    public void PdfLimitIncludesDpiAdjustedPageSize()
+    {
+        Assert.Throws<ArgumentException>(() => GenerationLimits.Validate(new RendererOptions { Kind = RendererKind.Pdf, PixelsPerModule = 11, Dpi = 36 }, 185));
+        GenerationLimits.Validate(new RendererOptions { Kind = RendererKind.Pdf, PixelsPerModule = 11, Dpi = 72 }, 185);
+    }
+
+    [Fact]
     public void UnbalancedAsciiModuleStringsRejected() => Assert.Throws<ArgumentException>(() =>
         GenerationLimits.Validate(new RendererOptions { Kind = RendererKind.Ascii, DarkColorString = "###", WhiteSpaceString = " " }, 29));
 }

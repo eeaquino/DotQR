@@ -186,6 +186,17 @@ missing or differing baseline fails instead of being written:
 CI=1 dotnet test DotQR.slnx
 ```
 
+All test projects use `xunit.v3` executable runners. For environments that restrict the VSTest test host,
+you can run a built suite directly, for example:
+
+```bash
+dotnet tests/DotQR.Core.Tests/bin/Debug/net10.0/DotQR.Core.Tests.dll -noLogo -noColor
+```
+
+To audit all resolved direct and transitive dependencies against NuGet deprecation metadata after
+restore, run `node tools/audit-deprecations.mjs` (Node 18+; no npm dependencies). The report is written to
+[docs/nuget-deprecation-audit.json](docs/nuget-deprecation-audit.json).
+
 All three libraries are trim- and AOT-analysis clean (`IsTrimmable`).
 
 ## License

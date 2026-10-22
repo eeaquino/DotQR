@@ -4,6 +4,7 @@
     <RootNamespace>DotQR.Playground</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="DotQR.Playground.Tests" />
     <ProjectReference Include="../../src/DotQR.Core/DotQR.Core.csproj" />
     <ProjectReference Include="../../src/DotQR.ByteRenderers/DotQR.ByteRenderers.csproj" />
     <ProjectReference Include="../../src/DotQR.SkiaSharp/DotQR.SkiaSharp.csproj" />

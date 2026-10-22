@@ -18,7 +18,7 @@ public sealed class PayloadValuesTests
     public void InvalidNumbersNameTheirField()
     {
         var values = new PayloadValues { ["amount"] = "invalid" };
-        Assert.Contains("amount", Assert.Throws<ArgumentException>(() => values.Decimal("amount")).Message, StringComparison.Ordinal);
+        Assert.Contains("amount", Assert.Throws<ArgumentException>(() => values.FractionalNumber("amount")).Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -29,11 +29,11 @@ public sealed class PayloadValuesTests
         {
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
             var values = new PayloadValues { ["amount"] = "1.25", ["flag"] = "false" };
-            Assert.Equal(1.25m, values.Decimal("amount"));
+            Assert.Equal(1.25m, values.FractionalNumber("amount"));
             Assert.False(values.Boolean("flag"));
             var copy = values.Clone();
             copy["amount"] = "2";
-            Assert.Equal(1.25m, values.Decimal("amount"));
+            Assert.Equal(1.25m, values.FractionalNumber("amount"));
         }
         finally
         {

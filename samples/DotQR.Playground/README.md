@@ -48,14 +48,14 @@ Micro QR has its own plain-text editor, initially `12345`; switching back restor
 | PdfByteQRCode | PDF; scale, opaque RGB, DPI; PNG **matrix fallback preview**, actual PDF download; obsolete unused JPEG-quality argument omitted |
 | SvgQRCode | SVG image preview/download; colors/alpha, quiet zones, fixed size or responsive viewBox, raster logo/coverage/background clearing |
 | PostscriptQRCode | Escaped PS/EPS text preview and actual download; scale or dimensions, opaque colors, quiet zones |
-| ASCIIQRCode | Regular module strings/repetition or compact blocks/inversion; quiet zones, LF/CRLF |
+| AsciiQRCode | Regular module strings/repetition or compact blocks/inversion; quiet zones, LF/CRLF |
 | QRCode (Skia) | PNG; scale, colors/alpha, quiet zones, optional logo/coverage/border/background |
 | ArtQRCode | PNG; dot factor, colors/background, quiet-zone style, optional background and finder-pattern images |
 | Base64QRCode | Base64 `.txt` download plus image and encoded-text preview; PNG/JPEG/WebP, colors, quiet zones, optional logo/coverage/border |
 
 SVG viewBox-only mode is responsive and intentionally hides fixed sizing: the library always uses module coordinates in its viewBox. PS/EPS explicit dimensions are a bounding box, not arbitrary module stretching. Long text previews are truncated at 12,000 characters; downloads always contain the entire output.
 
-Payment payloads can mandate ECC, ECI, or version. Girocode, Swiss, and Slovenian UPN therefore lock generic encoding controls and show the effective metadata. Russian orders use `ToBytes()` with the chosen character set; only ECC remains configurable because the binary API selects version automatically. Swiss v2 does not serialize the reserved ultimate-creditor or payment-date constructor arguments, so they have no controls. A Swiss QR bill additionally requires a prescribed Swiss-cross logo and payment-slip layout: this is a payload playground, not a certified QR-bill producer.
+Payment payloads can mandate ECC, ECI, or version. Swiss and Slovenian UPN lock generic encoding controls and show effective metadata. Girocode enforces ECC M and its selected payload charset: UTF-8 / ISO-8859-1 / ISO-8859-2 use the corresponding ECI and support requested QR versions; other character sets use exact binary bytes with automatic version, declaring the charset in the payment header. Generic ECI/UTF-8/BOM controls do not apply to Girocode. Russian orders use `ToBytes()` with the chosen character set; only ECC remains configurable because the binary API selects version automatically. Swiss v2 does not serialize the reserved ultimate-creditor or payment-date constructor arguments, so they have no controls. A Swiss QR bill additionally requires a prescribed Swiss-cross logo and payment-slip layout: this is a payload playground, not a certified QR-bill producer.
 
 Crypto addresses and payment examples are illustrative, not instructions to send money. This sample never submits a payment or initiates any encoded action.
 
@@ -69,12 +69,27 @@ Low contrast, transparency, decorative dots, logos, missing quiet zones, and dif
 
 ## Tests and manual checklist
 
-Tests are authored in `tests/DotQR.Playground.Tests`. **Builds, tests, Slopwatch, and browser verification were not executed**, per the workspace guidance for this task. To verify later:
+All four test projects use **xunit.v3 4.0.2** executable runners. The solution builds with zero warnings/errors, and all 783 tests pass (68 playground tests). Browser interactions were not automated; Slopwatch was not installed.
 
 ```sh
 dotnet build DotQR.slnx
 dotnet test tests/DotQR.Playground.Tests
 ```
+
+In environments that restrict VSTest parent-process monitoring or compiler-server named pipes, build single-node without shared compilation and use the standalone xUnit v3 runner:
+
+```sh
+dotnet build DotQR.slnx -m:1 -p:UseSharedCompilation=false
+dotnet tests/DotQR.Playground.Tests/bin/Debug/net10.0/DotQR.Playground.Tests.dll -noLogo -noColor
+```
+
+The repository's dependency audit checks every resolved direct/transitive package version against NuGet deprecation metadata. It requires Node 18+ and an existing restore, without npm dependencies:
+
+```sh
+node tools/audit-deprecations.mjs
+```
+
+The recorded report is `docs/nuget-deprecation-audit.json`. BenchmarkDotNet was updated to 0.15.8 to remove deprecated transitive packages.
 
 Manual checks:
 

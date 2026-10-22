@@ -10,12 +10,12 @@ public static partial class PayloadCatalog
         [
             Choice("outputType", "Contact format", P.ContactData.ContactOutputType.VCard3),
             Text("firstname", "First name", "Alex", true), Text("lastname", "Last name", "Sample", true),
-            Text("nickname", "Nickname"), Text("phone", "Home phone"), Text("mobilePhone", "Mobile phone", "+12025550123"), Text("workPhone", "Work phone"),
+            Text("nickname", "Nickname", visible: v => v.Text("outputType") != "VCard21"), Text("phone", "Home phone"), Text("mobilePhone", "Mobile phone", "+12025550123"), Text("workPhone", "Work phone"),
             Text("email", "Email", "alex@example.com"), Text("birthday", "Birthday", kind: FieldKind.Date), Text("website", "Website", "https://example.com"),
             Text("street", "Street", "Main Street"), Text("houseNumber", "House number", "1"), Text("city", "City", "Zurich"), Text("zipCode", "Postal code", "8000"),
             Text("country", "Country", "Switzerland"), Text("note", "Note", kind: FieldKind.Multiline), Text("stateRegion", "State / region"),
             Choice("addressOrder", "Address order", P.ContactData.AddressOrder.Default), Text("org", "Organization", "Example Ltd"), Text("orgTitle", "Job title"),
-            Choice("addressType", "Address type", P.ContactData.AddressType.Home)
+            Choice("addressType", "Address type", P.ContactData.AddressType.Home, v => v.Text("outputType") != "MeCard")
         ], v => new P.ContactData(v.Enum<P.ContactData.ContactOutputType>("outputType"), v.Text("firstname"), v.Text("lastname"),
             v.OptionalText("nickname"), v.OptionalText("phone"), v.OptionalText("mobilePhone"), v.OptionalText("workPhone"), v.OptionalText("email"), v.OptionalDate("birthday"),
             v.OptionalText("website"), v.OptionalText("street"), v.OptionalText("houseNumber"), v.OptionalText("city"), v.OptionalText("zipCode"), v.OptionalText("country"),

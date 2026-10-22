@@ -18,7 +18,7 @@
         }
         else
         {
-            <input id="@_id" type="@InputType" value="@Value" @oninput="Input" step="@(Field.Kind == FieldKind.Decimal ? "any" : null)" maxlength="8192" autocomplete="off" aria-required="@Field.Required" />
+            <input id="@_id" type="@InputType" value="@Value" @oninput="Input" step="@(Field.Kind == FieldKind.FractionalNumber ? "any" : null)" maxlength="8192" autocomplete="off" aria-required="@Field.Required" />
         }
     }
     @if (Field.Help is not null) { <small class="help">@Field.Help</small> }
@@ -31,7 +31,7 @@
     [Parameter] public EventCallback<FieldEdit> Changed { get; set; }
     private string InputType => Field.Kind switch
     {
-        FieldKind.Password => "password", FieldKind.Integer or FieldKind.Decimal => "number",
+        FieldKind.Password => "password", FieldKind.WholeNumber or FieldKind.FractionalNumber => "number",
         FieldKind.Date => "date", FieldKind.DateTime => "datetime-local", _ => "text"
     };
     private Task Input(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value?.ToString() ?? "", false));

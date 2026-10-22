@@ -14,7 +14,7 @@
     </section>
     <section class="panel configuration-panel" aria-label="Rendering configuration">
         <RendererEditor Options="_renderer" IsMicro="_encoding.IsMicro" Changed="RendererChanged" />
-        <EncodingEditor Options="_encoding" Locked="IsMandated" BinaryPayment="@(Definition.Id == "RussiaPaymentOrder")" Changed="EncodingChanged" />
+        <EncodingEditor Options="_encoding" Locked="IsMandated" BinaryPayment="@(Definition.Id == "RussiaPaymentOrder")" Girocode="@(Definition.Id == "Girocode")" GirocodeBinary="IsGirocodeBinary" Changed="EncodingChanged" />
     </section>
     <section class="panel preview-panel" aria-label="Live preview" aria-busy="@(_coordinator?.IsBusy ?? false)">
         <QrPreview Outcome="_coordinator?.Current" IsBusy="@(_coordinator?.IsBusy ?? false)" />
@@ -32,7 +32,8 @@
     private PayloadValues _microValues = new() { ["text"] = "12345" };
     private bool _disposed;
     private PayloadDefinition Definition => PayloadCatalog.All.Single(p => p.Id == _selected);
-    private bool IsMandated => Definition.Id is "Girocode" or "SwissQrCode" or "SlovenianUpnQr";
+    private bool IsMandated => Definition.Id is "SwissQrCode" or "SlovenianUpnQr";
+    private bool IsGirocodeBinary => Definition.Id == "Girocode" && GirocodeEncodingPolicy.EciFor(Values.Enum<PayloadGenerator.Girocode.GirocodeEncoding>("encoding")) is null;
     private PayloadValues Values
     {
         get

@@ -16,7 +16,8 @@ public sealed class ByteRendererServiceTests
         var result = _service.Generate(QrGenerationServiceTests.Request() with { Renderer = new() { Kind = kind } }).Result!;
         Assert.Equal(mime, result.MimeType);
         Assert.StartsWith(prefix, Convert.ToHexString(result.Content), StringComparison.Ordinal);
-        if (kind == RendererKind.Pdf) Assert.Contains("matrix", result.PreviewNotice!, StringComparison.OrdinalIgnoreCase);
+        if (kind == RendererKind.Pdf)
+            Assert.Contains("matrix", result.PreviewNotice!, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
