@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/DotQR.Playground/DotQR.Playground.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/DotQR.ByteRenderers/DotQR.ByteRenderers.csproj" />
     <Project Path="src/DotQR.Core/DotQR.Core.csproj" />
@@ -7,6 +10,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/DotQR.ByteRenderers.Tests/DotQR.ByteRenderers.Tests.csproj" />
     <Project Path="tests/DotQR.Core.Tests/DotQR.Core.Tests.csproj" />
+    <Project Path="tests/DotQR.Playground.Tests/DotQR.Playground.Tests.csproj" />
     <Project Path="tests/DotQR.SkiaSharp.Tests/DotQR.SkiaSharp.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

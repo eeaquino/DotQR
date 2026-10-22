@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>DotQR.Playground</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/DotQR.Core/DotQR.Core.csproj" />
+    <ProjectReference Include="../../src/DotQR.ByteRenderers/DotQR.ByteRenderers.csproj" />
+    <ProjectReference Include="../../src/DotQR.SkiaSharp/DotQR.SkiaSharp.csproj" />
+  </ItemGroup>
+</Project>
