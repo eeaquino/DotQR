@@ -16,6 +16,8 @@ Pre-flight interfaces:
 Task 2: implementation authored (option snapshots, capability predicates, resource limits, boundary tests); no build/test verification run.
 Task 3: encoding and all six byte renderers authored with format/metadata/error tests; no execution. Skia dispatch is implemented in Task 4.
 Task 4: Skia renderers, bounded codec-first upload validation, canonical PNG conversion, and tests authored; no execution.
+Task 5: latest-only immutable-state coordinator and deterministic timer/order/disposal tests authored; no execution.
+Ruling: Supersede pending edits through atomic request identity rather than cancelling every timer — the spec explicitly allows superseding; disposal cancels lifetime work — old timers live at most 250 ms, old native renders may finish but never publish.
 Ruling: Normalize uploaded raster images to PNG after bounded successful decoding — SvgLogo byte overload always declares PNG — normalized files over 2 MiB are rejected even if original compressed bytes fit.
 Ruling: Disable ArtQRCode for Micro QR — its standard three-finder-pattern assumptions are unsuitable — Micro artwork is unavailable, all other renderers retain matrix-based Micro support.
 Ruling: Omit PDF jpgQuality — source explicitly documents it as unused — no functional configuration is lost.
