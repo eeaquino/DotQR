@@ -14,6 +14,10 @@ Pre-flight interfaces:
 - Tasks 5 → 6: Changed dispatched through InvokeAsync; coordinator is component-owned, not singleton.
 
 Task 2: implementation authored (option snapshots, capability predicates, resource limits, boundary tests); no build/test verification run.
+Task 3: encoding and all six byte renderers authored with format/metadata/error tests; no execution. Skia dispatch is implemented in Task 4.
+Ruling: Disable ArtQRCode for Micro QR — its standard three-finder-pattern assumptions are unsuitable — Micro artwork is unavailable, all other renderers retain matrix-based Micro support.
+Ruling: Omit PDF jpgQuality — source explicitly documents it as unused — no functional configuration is lost.
+Ruling: Renderers own QRCodeData; capture metadata first and clone only for the PDF fallback preview — disposing a preview renderer must not invalidate the selected renderer's input — one small matrix copy for PDF.
 
 Task 1: implementation authored (catalogue, parsers, tests, project references); test execution intentionally omitted. Commit recorded in git.
 Ruling: Catalogue follows the explicit spec list (24 concrete payload classes plus plain text), not the README/plan's count of 25 concrete generators — source has 24 — no type omitted.
