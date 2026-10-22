@@ -15,7 +15,7 @@
     <div class="preview-stage">
         @if (result.PreviewDataUri is not null)
         {
-            <img class="qr-image" src="@result.PreviewDataUri" alt="Generated QR code preview; scanning has not been validated" />
+            <img class="qr-image @(result.SmoothPreview ? "smooth-preview" : "")" src="@result.PreviewDataUri" alt="Generated QR code preview; scanning has not been validated" />
         }
         else if (result.TextPreview is not null)
         {

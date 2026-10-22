@@ -46,7 +46,7 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     /// <param name="lightColor">Color of the light modules</param>
     /// <param name="backgroundColor">Color of the background</param>
     /// <param name="backgroundImage">A bitmap object that will be used as background picture</param>
-    /// <param name="pixelSizeFactor">Value between 0.0 to 1.0 that defines how big the module dots are. The bigger the value, the less round the dots will be.</param>
+    /// <param name="pixelSizeFactor">Value between 0.0 and 1.0 that defines each circular dot's diameter relative to its module. Dots remain circular at every size.</param>
     /// <param name="drawQuietZones">If true a white border is drawn around the whole QR Code</param>
     /// <param name="quietZoneRenderingStyle">Style of the quiet zones</param>
     /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quietzone</param>
@@ -58,7 +58,7 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     {
         if (pixelSizeFactor > 1)
             throw new ArgumentOutOfRangeException(nameof(pixelSizeFactor), "The parameter pixelSizeFactor must be between 0 and 1. (0-100%)");
-        var pixelSize = (int)Math.Min(pixelsPerModule, Math.Floor(pixelsPerModule * pixelSizeFactor));
+        var pixelSize = (float)(pixelsPerModule * pixelSizeFactor);
 
         var numModules = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8);
         var offset = drawQuietZones ? 0 : 4;
@@ -88,12 +88,12 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             }
         }
 
-        // Accumulate the dots into paths and paint each once, rather than issuing one draw call
-        // per module. Light dots are only worth building when they differ from the background;
-        // when the colors match, painting them is a no-op.
+        // Keep each dot an independent circle. A compound path changes edge coverage where
+        // circles touch, producing clipped-looking edges and uneven antialiasing.
+        // Paint light circles first so they cannot overwrite a dark circle's edge coverage.
         var drawLightDots = lightColor != backgroundColor;
-        using var lightBuilder = new SKPathBuilder();
-        using var darkBuilder = new SKPathBuilder();
+        var lightDots = new List<SKPoint>();
+        var darkDots = new List<SKPoint>();
         var radius = pixelSize / 2f;
         var centre = pixelsPerModule / 2f;
 
@@ -113,8 +113,8 @@ public class ArtQRCode : AbstractQRCode, IDisposable
                     }
                     else if (pixelSize > 0 && (pixelIsDark || drawLightDots))
                     {
-                        var builder = pixelIsDark ? darkBuilder : lightBuilder;
-                        builder.AddCircle(x * pixelsPerModule + centre, y * pixelsPerModule + centre, radius, SKPathDirection.Clockwise);
+                        var dots = pixelIsDark ? darkDots : lightDots;
+                        dots.Add(new SKPoint(x * pixelsPerModule + centre, y * pixelsPerModule + centre));
                     }
                 }
                 else if (finderPatternImage == null)
@@ -125,18 +125,13 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             }
         }
 
-        if (drawLightDots)
-        {
-            using var lightPath = lightBuilder.Detach();
-            dotPaint.Color = lightColor;
-            canvas.DrawPath(lightPath, dotPaint);
-        }
+        dotPaint.Color = lightColor;
+        foreach (var point in lightDots)
+            canvas.DrawCircle(point, radius, dotPaint);
 
-        using (var darkPath = darkBuilder.Detach())
-        {
-            dotPaint.Color = darkColor;
-            canvas.DrawPath(darkPath, dotPaint);
-        }
+        dotPaint.Color = darkColor;
+        foreach (var point in darkDots)
+            canvas.DrawCircle(point, radius, dotPaint);
 
         if (finderPatternImage != null)
         {
@@ -257,7 +252,7 @@ public static class ArtQRCodeHelper
     /// <param name="eciMode">Which ECI mode shall be used?</param>
     /// <param name="requestedVersion">Set fixed QR code target version.</param>
     /// <param name="backgroundImage">A bitmap object that will be used as background picture</param>
-    /// <param name="pixelSizeFactor">Value between 0.0 to 1.0 that defines how big the module dots are. The bigger the value, the less round the dots will be.</param>
+    /// <param name="pixelSizeFactor">Value between 0.0 and 1.0 that defines each circular dot's diameter relative to its module. Dots remain circular at every size.</param>
     /// <param name="drawQuietZones">If true a white border is drawn around the whole QR Code</param>
     /// <param name="quietZoneRenderingStyle">Style of the quiet zones</param>
     /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quietzone</param>

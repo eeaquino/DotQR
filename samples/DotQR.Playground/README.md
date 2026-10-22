@@ -69,7 +69,7 @@ Low contrast, transparency, decorative dots, logos, missing quiet zones, and dif
 
 ## Tests and manual checklist
 
-All four test projects use **xunit.v3 4.0.2** executable runners. The solution builds with zero warnings/errors, and all 783 tests pass (68 playground tests). Browser interactions were not automated; Slopwatch was not installed.
+All four test projects use **xunit.v3 4.0.2** executable runners. The solution builds with zero warnings/errors, and all 792 tests pass (71 playground tests). Browser interactions were not automated; Slopwatch was not installed.
 
 ```sh
 dotnet build DotQR.slnx

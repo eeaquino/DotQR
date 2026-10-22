@@ -44,6 +44,7 @@ summary { font-size: 12px; font-weight: 650; color: #45566a; padding: 6px 0; }
 .status-dot.working { background: #dba746; }
 .preview-stage { display: flex; align-items: center; justify-content: center; min-height: 290px; padding: 20px; background: repeating-conic-gradient(#edf0f3 0% 25%, #f8f9fa 0% 50%) 50% / 16px 16px; border: 1px solid #e5eaee; border-radius: 9px; overflow: auto; }
 .qr-image { display: block; width: min(100%, 310px); height: auto; image-rendering: pixelated; }
+.qr-image.smooth-preview { image-rendering: auto; }
 .preview-stage.empty { background: #f8fafb; flex-direction: column; color: #91a0af; font-size: 12px; }
 .preview-stage.empty > span { font-size: 80px; color: #d5dfe6; }
 .metadata { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0 18px; }

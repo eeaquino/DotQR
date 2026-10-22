@@ -19,6 +19,16 @@ public sealed class SkiaRendererServiceTests
     }
 
     [Theory]
+    [InlineData(RendererKind.Art, true)]
+    [InlineData(RendererKind.Skia, false)]
+    [InlineData(RendererKind.Png, false)]
+    public void OnlyArtworkRequestsSmoothPreviewScaling(RendererKind kind, bool smooth)
+    {
+        var result = _service.Generate(QrGenerationServiceTests.Request() with { Renderer = new() { Kind = kind } }).Result!;
+        Assert.Equal(smooth, result.SmoothPreview);
+    }
+
+    [Theory]
     [InlineData(Base64QRCode.ImageType.Png, "image/png", "89504E47")]
     [InlineData(Base64QRCode.ImageType.Jpeg, "image/jpeg", "FFD8")]
     [InlineData(Base64QRCode.ImageType.Webp, "image/webp", "52494646")]

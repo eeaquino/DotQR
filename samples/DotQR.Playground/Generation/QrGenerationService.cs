@@ -40,7 +40,7 @@ public sealed class QrGenerationService(ILogger<QrGenerationService> logger)
             if (rendered.Content.Length > GenerationLimits.MAX_OUTPUT_BYTES)
                 throw new ArgumentException("Output exceeds 16 MiB. Reduce size or renderer complexity.");
             return new(new(rendered.Content, rendered.FileName, rendered.MimeType, rendered.PreviewDataUri, rendered.TextPreview,
-                text, version, count, effective, rendered.PreviewNotice), null);
+                text, version, count, effective, rendered.PreviewNotice, request.Renderer.Kind == RendererKind.Art), null);
         }
         catch (Exception ex) when (IsInputError(ex))
         {
