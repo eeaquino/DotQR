@@ -13,6 +13,8 @@ Pre-flight interfaces:
 - Tasks 3/4 → 5: synchronous Generate adapted to cancellation-aware Task delegate; cancellation suppresses publication, not interrupted native rendering.
 - Tasks 5 → 6: Changed dispatched through InvokeAsync; coordinator is component-owned, not singleton.
 
+Task 2: implementation authored (option snapshots, capability predicates, resource limits, boundary tests); no build/test verification run.
+
 Task 1: implementation authored (catalogue, parsers, tests, project references); test execution intentionally omitted. Commit recorded in git.
 Ruling: Catalogue follows the explicit spec list (24 concrete payload classes plus plain text), not the README/plan's count of 25 concrete generators — source has 24 — no type omitted.
 Ruling: Do not expose Swiss requested payment date or ultimate creditor controls — source intentionally never serializes them in Swiss v2 — reserved constructor parameters cannot be experimented with through the UI.
