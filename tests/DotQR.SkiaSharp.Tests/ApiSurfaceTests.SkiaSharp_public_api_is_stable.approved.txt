@@ -5,11 +5,17 @@ TYPE DotQR.ArtQRCode [class] : DotQR.AbstractQRCode
   CTOR (DotQR.QRCodeData data)
   METHOD GetGraphic(SkiaSharp.SKBitmap backgroundImage = null) : SkiaSharp.SKBitmap
   METHOD GetGraphic(System.Int32 pixelsPerModule) : SkiaSharp.SKBitmap
+  METHOD GetGraphic(System.Int32 pixelsPerModule, DotQR.ArtQRCode+FinderPatternShape finderPatternShape, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKColor backgroundColor, SkiaSharp.SKBitmap backgroundImage = null, System.Double pixelSizeFactor = 1, System.Boolean drawQuietZones = true, DotQR.ArtQRCode+QuietZoneStyle quietZoneRenderingStyle = Dotted, DotQR.ArtQRCode+BackgroundImageStyle backgroundImageStyle = DataAreaOnly, SkiaSharp.SKBitmap finderPatternImage = null) : SkiaSharp.SKBitmap
   METHOD GetGraphic(System.Int32 pixelsPerModule, SkiaSharp.SKColor darkColor, SkiaSharp.SKColor lightColor, SkiaSharp.SKColor backgroundColor, SkiaSharp.SKBitmap backgroundImage = null, System.Double pixelSizeFactor = 1, System.Boolean drawQuietZones = true, DotQR.ArtQRCode+QuietZoneStyle quietZoneRenderingStyle = Dotted, DotQR.ArtQRCode+BackgroundImageStyle backgroundImageStyle = DataAreaOnly, SkiaSharp.SKBitmap finderPatternImage = null) : SkiaSharp.SKBitmap
 
 TYPE DotQR.ArtQRCode+BackgroundImageStyle [enum] : System.Enum
   FIELD static DataAreaOnly : DotQR.ArtQRCode+BackgroundImageStyle = 1
   FIELD static Fill : DotQR.ArtQRCode+BackgroundImageStyle = 0
+
+TYPE DotQR.ArtQRCode+FinderPatternShape [enum] : System.Enum
+  FIELD static Circle : DotQR.ArtQRCode+FinderPatternShape = 1
+  FIELD static RoundedSquare : DotQR.ArtQRCode+FinderPatternShape = 2
+  FIELD static Square : DotQR.ArtQRCode+FinderPatternShape = 0
 
 TYPE DotQR.ArtQRCode+QuietZoneStyle [enum] : System.Enum
   FIELD static Dotted : DotQR.ArtQRCode+QuietZoneStyle = 0

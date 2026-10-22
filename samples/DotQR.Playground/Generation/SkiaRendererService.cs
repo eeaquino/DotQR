@@ -19,7 +19,7 @@ internal static class SkiaRendererService
                 using (var background = o.BackgroundImage is null ? null : UploadImageReader.Decode(o.BackgroundImage))
                 using (var finder = o.FinderPatternImage is null ? null : UploadImageReader.Decode(o.FinderPatternImage))
                 using (var qr = new ArtQRCode(data))
-                using (var bitmap = qr.GetGraphic(o.PixelsPerModule, dark, light, SKColor.Parse(o.BackgroundColor), background, o.PixelSizeFactor,
+                using (var bitmap = qr.GetGraphic(o.PixelsPerModule, o.FinderPatternShape, dark, light, SKColor.Parse(o.BackgroundColor), background, o.PixelSizeFactor,
                     o.DrawQuietZones, o.QuietZoneRenderingStyle, o.BackgroundImageStyle, finder))
                     return Png(bitmap);
             case RendererKind.Base64:

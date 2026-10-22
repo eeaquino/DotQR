@@ -55,7 +55,32 @@ public class ArtQRCode : AbstractQRCode, IDisposable
     public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, SKBitmap? backgroundImage = null, double pixelSizeFactor = 1,
                                bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted,
                                BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, SKBitmap? finderPatternImage = null)
+        => GetGraphic(pixelsPerModule, FinderPatternShape.Square, darkColor, lightColor, backgroundColor, backgroundImage,
+            pixelSizeFactor, drawQuietZones, quietZoneRenderingStyle, backgroundImageStyle, finderPatternImage);
+
+    /// <summary>
+    /// Renders an art-style QR code using the selected shape for all three finder patterns.
+    /// Custom finder-pattern images take precedence over the shape. Other settings match the existing overload.
+    /// </summary>
+    /// <param name="pixelsPerModule">Size of each module in pixels.</param>
+    /// <param name="finderPatternShape">Shape of the outer rings and centers.</param>
+    /// <param name="darkColor">Color of dark modules.</param>
+    /// <param name="lightColor">Color of light modules.</param>
+    /// <param name="backgroundColor">Background color.</param>
+    /// <param name="backgroundImage">Optional background image.</param>
+    /// <param name="pixelSizeFactor">Circular data-dot diameter relative to its module.</param>
+    /// <param name="drawQuietZones">Whether to include quiet zones.</param>
+    /// <param name="quietZoneRenderingStyle">Quiet-zone rendering style.</param>
+    /// <param name="backgroundImageStyle">Background-image placement.</param>
+    /// <param name="finderPatternImage">Optional image replacing all finder patterns.</param>
+    /// <returns>QR code bitmap.</returns>
+    public SKBitmap GetGraphic(int pixelsPerModule, FinderPatternShape finderPatternShape, SKColor darkColor, SKColor lightColor, SKColor backgroundColor,
+        SKBitmap? backgroundImage = null, double pixelSizeFactor = 1, bool drawQuietZones = true,
+        QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted, BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly,
+        SKBitmap? finderPatternImage = null)
     {
+        if (finderPatternShape is not (FinderPatternShape.Square or FinderPatternShape.Circle or FinderPatternShape.RoundedSquare))
+            throw new ArgumentOutOfRangeException(nameof(finderPatternShape));
         if (pixelSizeFactor > 1)
             throw new ArgumentOutOfRangeException(nameof(pixelSizeFactor), "The parameter pixelSizeFactor must be between 0 and 1. (0-100%)");
         var pixelSize = (float)(pixelsPerModule * pixelSizeFactor);
@@ -117,7 +142,7 @@ public class ArtQRCode : AbstractQRCode, IDisposable
                         dots.Add(new SKPoint(x * pixelsPerModule + centre, y * pixelsPerModule + centre));
                     }
                 }
-                else if (finderPatternImage == null)
+                else if (finderPatternImage == null && finderPatternShape == FinderPatternShape.Square)
                 {
                     flatPaint.Color = pixelIsDark ? darkColor : lightColor;
                     canvas.DrawRect(rectangle, flatPaint);
@@ -143,7 +168,61 @@ public class ArtQRCode : AbstractQRCode, IDisposable
             canvas.DrawBitmap(finderPatternImage, SKRect.Create(finderPatternOffset, size - finderPatternOffset - finderPatternSize, finderPatternSize, finderPatternSize), sampling, imagePaint);
         }
 
+        else if (finderPatternShape != FinderPatternShape.Square)
+        {
+            var start = drawQuietZones ? 4 * pixelsPerModule : 0;
+            var far = size - start - 7 * pixelsPerModule;
+            DrawFinderPattern(canvas, start, start, pixelsPerModule, finderPatternShape, darkColor, lightColor);
+            DrawFinderPattern(canvas, far, start, pixelsPerModule, finderPatternShape, darkColor, lightColor);
+            DrawFinderPattern(canvas, start, far, pixelsPerModule, finderPatternShape, darkColor, lightColor);
+        }
+
         return bitmap;
+    }
+
+    private static void DrawFinderPattern(SKCanvas canvas, int x, int y, int scale, FinderPatternShape shape, SKColor dark, SKColor light)
+    {
+        using var darkBuilder = new SKPathBuilder { FillType = SKPathFillType.EvenOdd };
+        AddContour(SKRect.Create(x, y, 7 * scale, 7 * scale), 2 * scale);
+        AddContour(SKRect.Create(x + scale, y + scale, 5 * scale, 5 * scale), scale);
+        AddContour(SKRect.Create(x + 2 * scale, y + 2 * scale, 3 * scale, 3 * scale), scale);
+
+        // Derive both colors from the SAME antialiased coverage on an isolated layer.
+        // Independently rasterizing inverse paths can leave seams from different edge coverage.
+        using var darkPath = darkBuilder.Detach();
+        var bounds = SKRect.Create(x, y, 7 * scale, 7 * scale);
+        using var paint = new SKPaint { Color = light };
+        canvas.SaveLayer(bounds, null);
+        canvas.DrawRect(bounds, paint);
+        paint.IsAntialias = true;
+        paint.Color = SKColors.White;
+        paint.BlendMode = SKBlendMode.DstOut;
+        canvas.DrawPath(darkPath, paint);
+        paint.Color = dark;
+        paint.BlendMode = SKBlendMode.Plus;
+        canvas.DrawPath(darkPath, paint);
+        canvas.Restore();
+
+        void AddContour(SKRect bounds, float radius)
+        {
+            if (shape == FinderPatternShape.Circle)
+                darkBuilder.AddOval(bounds);
+            else
+                darkBuilder.AddRoundRect(bounds, radius, radius);
+        }
+    }
+
+    /// <summary>
+    /// Shapes available for the three finder-pattern rings and centers.
+    /// </summary>
+    public enum FinderPatternShape
+    {
+        /// <summary>Traditional square finder patterns.</summary>
+        Square,
+        /// <summary>Circular finder-pattern rings and centers.</summary>
+        Circle,
+        /// <summary>Square finder-pattern rings and centers with rounded corners.</summary>
+        RoundedSquare
     }
 
     /// <summary>

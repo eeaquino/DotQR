@@ -9,7 +9,7 @@
         @if (Field.Kind == FieldKind.Select)
         {
             <select id="@_id" value="@Value" @onchange="Select" aria-required="@Field.Required">
-                @foreach (var choice in Field.Choices ?? []) { <option value="@choice">@(choice.Length == 0 ? "None" : choice)</option> }
+                @foreach (var choice in Field.Choices ?? []) { <option value="@choice">@ChoiceLabel(choice)</option> }
             </select>
         }
         else if (Field.Kind == FieldKind.Multiline)
@@ -34,6 +34,8 @@
         FieldKind.Password => "password", FieldKind.WholeNumber or FieldKind.FractionalNumber => "number",
         FieldKind.Date => "date", FieldKind.DateTime => "datetime-local", _ => "text"
     };
+    private string ChoiceLabel(string choice) => choice.Length == 0 ? "None"
+        : Field.Key == "FinderPatternShape" && choice == "RoundedSquare" ? "Rounded square" : choice;
     private Task Input(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value?.ToString() ?? "", false));
     private Task Select(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value?.ToString() ?? "", true));
     private Task Toggle(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value is true ? "true" : "false", true));

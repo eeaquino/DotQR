@@ -80,10 +80,15 @@ Artistic rendering with round module dots, and base64 output for embedding in HT
 
 ```csharp
 using var art = new ArtQRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, SKColors.White);
+// Shape all three anchors (outer rings and centers); data dots stay circular.
+using var rounded = new ArtQRCode(data).GetGraphic(10, ArtQRCode.FinderPatternShape.RoundedSquare,
+    SKColors.Black, SKColors.White, SKColors.White);
 
 string dataUri = "data:image/png;base64," +
     new Base64QRCode(data).GetGraphic(10, SKColors.Black, SKColors.White);
 ```
+
+Art anchor shapes are `Square` (the default), `Circle`, and `RoundedSquare`. A custom `finderPatternImage` overrides the selected shape. The playground exposes these under **Art → Anchor shape**.
 
 ### Generate module data only
 

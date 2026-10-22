@@ -65,6 +65,7 @@ internal static class RendererFieldCatalog
         {
             fields.Add(new("BackgroundColor", "Art background (#RRGGBB)", FieldKind.Text));
             fields.Add(new("PixelSizeFactor", "Dot size factor (0–1)", FieldKind.FractionalNumber));
+            fields.Add(Select<ArtQRCode.FinderPatternShape>("FinderPatternShape", "Anchor shape"));
             if (o.DrawQuietZones)
                 fields.Add(Select<ArtQRCode.QuietZoneStyle>("QuietZoneRenderingStyle", "Quiet-zone style"));
             if (o.BackgroundImage is not null)
@@ -101,6 +102,7 @@ internal static class RendererFieldCatalog
         ["FillLogoBackground"] = B(o.FillLogoBackground),
         ["BackgroundColor"] = o.BackgroundColor,
         ["PixelSizeFactor"] = o.PixelSizeFactor.ToString(CultureInfo.InvariantCulture),
+        ["FinderPatternShape"] = o.FinderPatternShape.ToString(),
         ["QuietZoneRenderingStyle"] = o.QuietZoneRenderingStyle.ToString(),
         ["BackgroundImageStyle"] = o.BackgroundImageStyle.ToString()
     };
@@ -150,6 +152,7 @@ internal static class RendererFieldCatalog
         "FillLogoBackground" => o with { FillLogoBackground = v.Boolean(key) },
         "BackgroundColor" => o with { BackgroundColor = v.Text(key) },
         "PixelSizeFactor" => o with { PixelSizeFactor = v.Number(key) },
+        "FinderPatternShape" => o with { FinderPatternShape = v.Enum<ArtQRCode.FinderPatternShape>(key) },
         "QuietZoneRenderingStyle" => o with { QuietZoneRenderingStyle = v.Enum<ArtQRCode.QuietZoneStyle>(key) },
         "BackgroundImageStyle" => o with { BackgroundImageStyle = v.Enum<ArtQRCode.BackgroundImageStyle>(key) },
         _ => o

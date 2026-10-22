@@ -31,6 +31,7 @@ public sealed record RendererOptions
     public bool FillLogoBackground { get; init; } = true;
     public string BackgroundColor { get; init; } = "#ffffff";
     public double PixelSizeFactor { get; init; } = 0.8;
+    public ArtQRCode.FinderPatternShape FinderPatternShape { get; init; } = ArtQRCode.FinderPatternShape.Square;
     public ArtQRCode.QuietZoneStyle QuietZoneRenderingStyle { get; init; } = ArtQRCode.QuietZoneStyle.Dotted;
     public ArtQRCode.BackgroundImageStyle BackgroundImageStyle { get; init; } = ArtQRCode.BackgroundImageStyle.DataAreaOnly;
     public byte[]? BackgroundImage { get; init; }
