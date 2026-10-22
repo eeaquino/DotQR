@@ -1,0 +1,35 @@
+<div class="section-heading"><h2><span class="step">01</span> Payload</h2><button class="quiet-button" @onclick="Reset">Reset example</button></div>
+<label for="payload-type">What would you like to encode?</label>
+<select id="payload-type" value="@Definition.Id" disabled="@IsMicro" @onchange="SelectPayload">
+    @foreach (var group in PayloadCatalog.All.GroupBy(p => p.Group))
+    {
+        <optgroup label="@group.Key">
+            @foreach (var payload in group) { <option value="@payload.Id">@payload.Label</option> }
+        </optgroup>
+    }
+</select>
+@if (IsMicro) { <p class="help">Micro QR uses plain text only. Switch to standard QR to choose a structured payload.</p> }
+<div class="payload-fields">
+    @foreach (var field in Definition.Fields.Where(f => f.VisibleWhen?.Invoke(Values) != false))
+    {
+        <PayloadFieldEditor @key="(Definition.Id, field.Key)" Field="field" Value="@Values[field.Key]" Changed="Changed" />
+    }
+</div>
+@if (Definition.Id == "SwissQrCode")
+{
+    <p class="notice">Swiss v2 omits reserved ultimate-creditor and payment-date fields. A complete QR bill also needs the mandated Swiss cross and payment-slip layout; this sample generates the QR payload, not a certified payment slip.</p>
+}
+@if (Definition.Group is "Payments" or "Crypto")
+{
+    <p class="help">Illustrative data only. Replace account/address details before real use. No payment or network action is performed.</p>
+}
+
+@code {
+    [Parameter, EditorRequired] public PayloadDefinition Definition { get; set; } = default!;
+    [Parameter, EditorRequired] public PayloadValues Values { get; set; } = default!;
+    [Parameter] public bool IsMicro { get; set; }
+    [Parameter] public EventCallback<string> Selected { get; set; }
+    [Parameter] public EventCallback<FieldEdit> Changed { get; set; }
+    [Parameter] public EventCallback Reset { get; set; }
+    private Task SelectPayload(ChangeEventArgs args) => Selected.InvokeAsync(args.Value?.ToString() ?? "text");
+}

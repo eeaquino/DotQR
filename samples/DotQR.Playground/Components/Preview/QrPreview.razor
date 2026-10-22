@@ -1,0 +1,88 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject ILogger<QrPreview> Logger
+
+<div class="section-heading"><h2><span class="step">03</span> Preview</h2><span class="status-dot @(IsBusy ? "working" : "")" aria-hidden="true"></span></div>
+<div role="status" aria-live="polite" class="preview-status">
+    @(IsBusy ? "Updating QR code…" : Outcome?.Result is not null ? "Preview up to date" : "Waiting for valid content")
+</div>
+@if (Outcome?.Error is { } error)
+{
+    <div class="error-box" role="alert"><strong>Check your settings</strong><p>@error</p></div>
+}
+@if (Outcome?.Result is { } result && !IsBusy)
+{
+    <div class="preview-stage">
+        @if (result.PreviewDataUri is not null)
+        {
+            <img class="qr-image" src="@result.PreviewDataUri" alt="Generated QR code preview; scanning has not been validated" />
+        }
+        else if (result.TextPreview is not null)
+        {
+            <pre class="text-preview">@ShortText(result.TextPreview)</pre>
+        }
+    </div>
+    @if (result.PreviewNotice is not null) { <p class="help">@result.PreviewNotice</p> }
+    <dl class="metadata">
+        <div><dt>Version</dt><dd>@(result.Version < 0 ? $"Micro M{-result.Version}" : result.Version.ToString(CultureInfo.InvariantCulture))</dd></div>
+        <div><dt>Matrix</dt><dd>@result.ModuleCount × @result.ModuleCount</dd></div>
+        <div><dt>Output</dt><dd>@result.FileName</dd></div>
+        <div><dt>Size</dt><dd>@result.Content.Length.ToString("N0", CultureInfo.InvariantCulture) bytes</dd></div>
+    </dl>
+    <p class="encoding-readout">@result.EffectiveEncoding</p>
+    <button class="download-button" @onclick="Download" disabled="@_downloading">@(_downloading ? "Downloading…" : $"Download {result.FileName}") <span aria-hidden="true">↓</span></button>
+    @if (result.PreviewDataUri is not null && result.TextPreview is not null)
+    {
+        <details><summary>Base64 output</summary><pre class="text-preview">@ShortText(result.TextPreview)</pre></details>
+    }
+    <details class="payload-inspector"><summary>Inspect encoded payload</summary><pre>@result.PayloadText</pre></details>
+}
+else
+{
+    <div class="preview-stage empty"><span aria-hidden="true">▦</span><p>@(IsBusy ? "Rendering your next code" : "Your QR code will appear here")</p></div>
+    <button class="download-button" disabled>Download unavailable</button>
+}
+@if (_downloadError is not null) { <p class="field-error" role="alert">@_downloadError</p> }
+
+@code {
+    [Parameter] public GenerationOutcome? Outcome { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    private IJSObjectReference? _module;
+    private bool _downloading;
+    private bool _disposed;
+    private string? _downloadError;
+    private static string ShortText(string text) => text.Length <= 12000 ? text : text[..12000] + "\n… Preview truncated; download contains the complete output.";
+
+    private async Task Download()
+    {
+        var result = Outcome?.Result;
+        if (result is null || IsBusy || _downloading || _disposed) return;
+        _downloading = true;
+        _downloadError = null;
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./download.js");
+            if (_disposed || IsBusy || !ReferenceEquals(Outcome?.Result, result)) return;
+            using var stream = new MemoryStream(result.Content, writable: false);
+            using var reference = new DotNetStreamReference(stream);
+            await _module.InvokeVoidAsync("download", result.FileName, result.MimeType, reference);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogDebug("Download interop unavailable ({ErrorType}).", ex.GetType().Name);
+            _downloadError = "Download could not finish. Reconnect or retry.";
+        }
+        finally { _downloading = false; }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        if (_module is null) return;
+        try { await _module.DisposeAsync(); }
+        catch (JSDisconnectedException)
+        {
+            Logger.LogDebug("Download module released after circuit disconnect.");
+        }
+    }
+}

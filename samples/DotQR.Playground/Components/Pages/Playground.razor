@@ -1,0 +1,114 @@
+@page "/"
+@implements IAsyncDisposable
+@inject QrGenerationService Generator
+
+<PageTitle>DotQR — QR playground</PageTitle>
+<section class="intro">
+    <div><p class="eyebrow">CREATE · CONFIGURE · EXPLORE</p><h1>A QR code for <span>every idea.</span></h1><p class="lead">Explore every payload and renderer in DotQR. Change a field and watch your code take shape.</p></div>
+    <div class="intro-stat"><strong>24 + text</strong><span>payload choices</span><strong>9</strong><span>renderers</span></div>
+</section>
+<p class="privacy-note"><strong>Server-side sample.</strong> Content, Wi-Fi passwords, OTP secrets, and uploaded images are processed on this server. They are kept only in this circuit's memory, not intentionally logged or saved. Use example secrets, not production credentials.</p>
+<div class="workspace">
+    <section class="panel payload-panel" aria-label="Payload configuration">
+        <PayloadEditor Definition="Definition" Values="Values" IsMicro="_encoding.IsMicro" Selected="SelectPayload" Changed="PayloadChanged" Reset="ResetPayload" />
+    </section>
+    <section class="panel configuration-panel" aria-label="Rendering configuration">
+        <RendererEditor Options="_renderer" IsMicro="_encoding.IsMicro" Changed="RendererChanged" />
+        <EncodingEditor Options="_encoding" Locked="IsMandated" BinaryPayment="@(Definition.Id == "RussiaPaymentOrder")" Changed="EncodingChanged" />
+    </section>
+    <section class="panel preview-panel" aria-label="Live preview" aria-busy="@(_coordinator?.IsBusy ?? false)">
+        <QrPreview Outcome="_coordinator?.Current" IsBusy="@(_coordinator?.IsBusy ?? false)" />
+    </section>
+</div>
+
+@code {
+    private string _selected = "text";
+    private string _standardPayload = "text";
+    private readonly Dictionary<string, PayloadValues> _payloadValues = new(StringComparer.Ordinal);
+    private EncodingOptions _encoding = new();
+    private RendererOptions _renderer = new();
+    private LiveGenerationCoordinator? _coordinator;
+    private string? _rendererError;
+    private PayloadValues _microValues = new() { ["text"] = "12345" };
+    private bool _disposed;
+    private PayloadDefinition Definition => PayloadCatalog.All.Single(p => p.Id == _selected);
+    private bool IsMandated => Definition.Id is "Girocode" or "SwissQrCode" or "SlovenianUpnQr";
+    private PayloadValues Values
+    {
+        get
+        {
+            if (_encoding.IsMicro) return _microValues;
+            if (!_payloadValues.TryGetValue(_selected, out var values))
+            {
+                values = PayloadCatalog.CreateExample(_selected);
+                _payloadValues.Add(_selected, values);
+            }
+            return values;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _coordinator = new((request, token) => Task.Run(() => Generator.Generate(request), token), TimeProvider.System);
+        _coordinator.Changed += GenerationChanged;
+        await Refresh(true);
+    }
+
+    private void GenerationChanged()
+    {
+        if (!_disposed) _ = InvokeAsync(() => { if (!_disposed) StateHasChanged(); });
+    }
+    private Task Refresh(bool immediate)
+    {
+        if (_disposed || _coordinator is null) return Task.CompletedTask;
+        if (_rendererError is not null)
+        {
+            _coordinator.Reject(_rendererError);
+            return Task.CompletedTask;
+        }
+        return _coordinator.SubmitAsync(new(Definition, Values, _encoding, _renderer), immediate);
+    }
+    private async Task SelectPayload(string id)
+    {
+        _selected = id;
+        await Refresh(true);
+    }
+    private async Task PayloadChanged(FieldEdit edit)
+    {
+        Values[edit.Key] = edit.Value;
+        await Refresh(edit.Immediate);
+    }
+    private async Task ResetPayload()
+    {
+        if (_encoding.IsMicro) _microValues = new() { ["text"] = "12345" };
+        else _payloadValues[_selected] = PayloadCatalog.CreateExample(_selected);
+        await Refresh(true);
+    }
+    private async Task RendererChanged(OptionsChange<RendererOptions> change)
+    {
+        if (change.Options is not null) _renderer = change.Options;
+        _rendererError = change.Error;
+        await Refresh(change.Immediate);
+    }
+    private async Task EncodingChanged(EncodingOptions options)
+    {
+        if (options.IsMicro && !_encoding.IsMicro)
+        {
+            _standardPayload = _selected;
+            _selected = "text";
+            if (_renderer.Kind == RendererKind.Art) { _renderer = _renderer with { Kind = RendererKind.Png }; _rendererError = null; }
+        }
+        else if (!options.IsMicro && _encoding.IsMicro) _selected = _standardPayload;
+        _encoding = options;
+        await Refresh(true);
+    }
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        if (_coordinator is not null)
+        {
+            _coordinator.Changed -= GenerationChanged;
+            await _coordinator.DisposeAsync();
+        }
+    }
+}

@@ -19,6 +19,18 @@ public sealed class LiveGenerationCoordinator : IAsyncDisposable
     public bool IsBusy => Volatile.Read(ref _state).Busy;
     public event Action? Changed;
 
+    public void Reject(string error)
+    {
+        State previous;
+        var rejected = new State(new(null, error), false);
+        do
+        {
+            previous = Volatile.Read(ref _state);
+            if (previous.Disposed) return;
+        } while (!ReferenceEquals(Interlocked.CompareExchange(ref _state, rejected, previous), previous));
+        Changed?.Invoke();
+    }
+
     public async Task SubmitAsync(GenerationRequest request, bool immediate = false)
     {
         if (Volatile.Read(ref _state).Disposed) return;

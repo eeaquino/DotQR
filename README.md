@@ -120,6 +120,19 @@ var payload = new PayloadGenerator.WiFi("MyNetwork", "password", PayloadGenerato
 using var data = generator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.M);
 ```
 
+## Interactive Blazor sample
+
+The [Blazor Server playground](samples/DotQR.Playground/README.md) exposes every payload generator,
+standard and Micro QR encoding, and all nine renderers with live configuration, previews, and downloads.
+It references the local projects directly instead of installing DotQR NuGet packages.
+
+```bash
+dotnet run --project samples/DotQR.Playground
+```
+
+Open `http://localhost:5080`. Payloads and uploaded images are processed on the server; use example
+secrets. See the sample README for Linux native dependencies, renderer differences, and limits.
+
 ## Performance
 
 The QRCoder encoding path is kept, with the rendering and checksum hot paths rewritten. Measured

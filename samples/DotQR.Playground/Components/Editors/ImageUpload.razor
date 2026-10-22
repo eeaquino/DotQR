@@ -1,0 +1,67 @@
+@implements IDisposable
+@inject ILogger<ImageUpload> Logger
+
+<div class="image-upload">
+    <label for="@_id">@Label</label>
+    <InputFile id="@_id" OnChange="ReadImage" accept="image/png,image/jpeg,image/webp" disabled="@_busy" />
+    <small class="help">PNG, JPEG or WebP · max 2 MiB · max 2048 × 2048 · normalized to PNG</small>
+    @if (HasImage || _error is not null)
+    {
+        <button class="quiet-button" type="button" @onclick="Clear" disabled="@_busy">Remove image / clear error</button>
+    }
+    @if (_error is not null) { <p class="field-error" role="alert">@_error</p> }
+</div>
+
+@code {
+    private readonly string _id = "upload-" + Guid.NewGuid().ToString("N");
+    private readonly CancellationTokenSource _lifetime = new();
+    private bool _busy;
+    private bool _disposed;
+    private string? _error;
+    [Parameter] public string Label { get; set; } = "Image";
+    [Parameter] public bool HasImage { get; set; }
+    [Parameter] public EventCallback<ImageEdit> Changed { get; set; }
+    private async Task ReadImage(InputFileChangeEventArgs e)
+    {
+        _busy = true;
+        _error = null;
+        await Changed.InvokeAsync(new(null, null, true));
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(GenerationLimits.MaxUploadBytes, _lifetime.Token);
+            var bytes = await UploadImageReader.ReadAsync(stream, file.Size, _lifetime.Token);
+            if (!_disposed) await Changed.InvokeAsync(new(bytes, null, false));
+        }
+        catch (OperationCanceledException) when (_disposed)
+        {
+            return;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or InvalidOperationException)
+        {
+            _error = ex is IOException ? "Image could not be read or exceeds 2 MiB." : ex.Message;
+            if (!_disposed) await Changed.InvokeAsync(new(null, _error, false));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("Image processing failed ({ErrorType}); image contents were not logged.", ex.GetType().Name);
+            _error = "Image processing is unavailable. Check native SkiaSharp setup.";
+            if (!_disposed) await Changed.InvokeAsync(new(null, _error, false));
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+    private async Task Clear()
+    {
+        _error = null;
+        await Changed.InvokeAsync(new(null, null, false));
+    }
+    public void Dispose()
+    {
+        _disposed = true;
+        _lifetime.Cancel();
+        _lifetime.Dispose();
+    }
+}

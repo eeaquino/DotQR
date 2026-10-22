@@ -17,6 +17,11 @@ Task 2: implementation authored (option snapshots, capability predicates, resour
 Task 3: encoding and all six byte renderers authored with format/metadata/error tests; no execution. Skia dispatch is implemented in Task 4.
 Task 4: Skia renderers, bounded codec-first upload validation, canonical PNG conversion, and tests authored; no execution.
 Task 5: latest-only immutable-state coordinator and deterministic timer/order/disposal tests authored; no execution.
+Task 6: Blazor shell, schema-driven forms, conditional renderer/encoding controls, uploads, responsive CSS, preview/download interop, and documentation authored; no runtime verification. Whole-change review pending.
+Ruling: SVG viewBox-only mode hides scale and explicit dimensions — source always uses module coordinates and omits physical width/height — users size that responsive output in its container.
+Ruling: Add coordinator Reject(error) for locally invalid renderer inputs and upload-in-progress — they must invalidate in-flight results even before a renderable typed request exists — one extra coordinator API and regression test.
+Ruling: Use a separate Micro text editor state initialized to 12345 — preserves the standard plain-text payload across family switches — Micro and standard plain text are edited independently.
+Ruling: Use loopback HTTP on port 5080 in Development; production enables HTTPS redirection/HSTS — removes development certificate setup for a local-only sample — do not expose the development profile publicly.
 Ruling: Supersede pending edits through atomic request identity rather than cancelling every timer — the spec explicitly allows superseding; disposal cancels lifetime work — old timers live at most 250 ms, old native renders may finish but never publish.
 Ruling: Normalize uploaded raster images to PNG after bounded successful decoding — SvgLogo byte overload always declares PNG — normalized files over 2 MiB are rejected even if original compressed bytes fit.
 Ruling: Disable ArtQRCode for Micro QR — its standard three-finder-pattern assumptions are unsuitable — Micro artwork is unavailable, all other renderers retain matrix-based Micro support.

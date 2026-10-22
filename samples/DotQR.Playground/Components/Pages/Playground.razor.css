@@ -1,0 +1,13 @@
+.intro { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 44px 0 20px; }
+.eyebrow { font-size: 10px; font-weight: 750; letter-spacing: 2px; color: #788c99; margin: 0; }
+.lead { color: #6b7a8c; font-size: 13px; max-width: 620px; margin-bottom: 10px; }
+.intro-stat { display: grid; grid-template-columns: auto auto; align-items: center; gap: 5px 10px; padding: 18px 24px; border-left: 1px solid #dce4e8; }
+.intro-stat strong { color: #254a40; font-size: 22px; text-align: right; }
+.intro-stat span { font-size: 11px; color: #7e8b99; }
+.privacy-note { font-size: 11px; color: #607184; background: #edf1f4; border-radius: 7px; padding: 12px 16px; margin: 0 0 24px; }
+.workspace { display: grid; grid-template-columns: 1.05fr 1fr 1.12fr; gap: 20px; align-items: start; }
+.panel { min-width: 0; border: 1px solid #e0e6ec; border-radius: 12px; background: white; padding: 24px; box-shadow: 0 4px 12px #23354203; }
+.preview-panel { position: sticky; top: 20px; }
+@media (min-width: 1101px) { .payload-panel { max-height: 1050px; overflow-y: auto; } }
+@media (max-width: 1100px) { .workspace { grid-template-columns: 1fr 1fr; } .preview-panel { grid-column: 1 / -1; position: static; } }
+@media (max-width: 700px) { .workspace { grid-template-columns: 1fr; } .intro { padding-top: 28px; } .intro-stat { display: none; } .panel { padding: 20px; } }

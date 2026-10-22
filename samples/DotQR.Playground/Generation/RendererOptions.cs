@@ -36,7 +36,8 @@ public sealed record RendererOptions
     public byte[]? BackgroundImage { get; init; }
     public byte[]? FinderPatternImage { get; init; }
 
-    public bool HasScale => Kind != RendererKind.Ascii && !(Kind is RendererKind.Svg or RendererKind.Postscript && ExplicitSize);
+    public bool HasScale => Kind != RendererKind.Ascii && !((Kind is RendererKind.Svg or RendererKind.Postscript) && ExplicitSize)
+        && !(Kind == RendererKind.Svg && SizingMode == SvgQRCode.SizingMode.ViewBoxAttribute);
     public bool HasColors => Kind != RendererKind.Ascii;
     public bool HasAlpha => Kind is RendererKind.Png or RendererKind.Svg or RendererKind.Skia or RendererKind.Art || (Kind == RendererKind.Base64 && ImageType != Base64QRCode.ImageType.Jpeg);
     public bool HasQuietZones => Kind is not (RendererKind.Bitmap or RendererKind.Pdf);

@@ -1,0 +1,40 @@
+<div class="field @(Field.Kind == FieldKind.Boolean ? "field-toggle" : "")">
+    @if (Field.Kind == FieldKind.Boolean)
+    {
+        <label for="@_id"><input id="@_id" type="checkbox" checked="@(Value == "true")" @onchange="Toggle" /> @Field.Label</label>
+    }
+    else
+    {
+        <label for="@_id">@Field.Label @if (Field.Required) { <span class="required" title="Required">*</span> }</label>
+        @if (Field.Kind == FieldKind.Select)
+        {
+            <select id="@_id" value="@Value" @onchange="Select" aria-required="@Field.Required">
+                @foreach (var choice in Field.Choices ?? []) { <option value="@choice">@(choice.Length == 0 ? "None" : choice)</option> }
+            </select>
+        }
+        else if (Field.Kind == FieldKind.Multiline)
+        {
+            <textarea id="@_id" value="@Value" @oninput="Input" rows="4" maxlength="8192" spellcheck="false" aria-required="@Field.Required"></textarea>
+        }
+        else
+        {
+            <input id="@_id" type="@InputType" value="@Value" @oninput="Input" step="@(Field.Kind == FieldKind.Decimal ? "any" : null)" maxlength="8192" autocomplete="off" aria-required="@Field.Required" />
+        }
+    }
+    @if (Field.Help is not null) { <small class="help">@Field.Help</small> }
+</div>
+
+@code {
+    private readonly string _id = "field-" + Guid.NewGuid().ToString("N");
+    [Parameter, EditorRequired] public PayloadField Field { get; set; } = default!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<FieldEdit> Changed { get; set; }
+    private string InputType => Field.Kind switch
+    {
+        FieldKind.Password => "password", FieldKind.Integer or FieldKind.Decimal => "number",
+        FieldKind.Date => "date", FieldKind.DateTime => "datetime-local", _ => "text"
+    };
+    private Task Input(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value?.ToString() ?? "", false));
+    private Task Select(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value?.ToString() ?? "", true));
+    private Task Toggle(ChangeEventArgs args) => Changed.InvokeAsync(new(Field.Key, args.Value is true ? "true" : "false", true));
+}

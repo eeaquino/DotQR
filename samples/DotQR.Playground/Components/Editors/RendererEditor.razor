@@ -1,0 +1,86 @@
+<div class="section-heading"><h2><span class="step">02</span> Appearance</h2><span class="live-chip">LIVE</span></div>
+<fieldset disabled="@_uploading">
+    @foreach (var field in RendererFieldCatalog.Fields(_draft, IsMicro))
+    {
+        <PayloadFieldEditor @key="field.Key" Field="field" Value="@_values[field.Key]" Changed="Edit" />
+    }
+    @if (_draft.Kind is RendererKind.Bitmap or RendererKind.Pdf)
+    {
+        <p class="help">This renderer always includes the matrix quiet zone and uses opaque RGB colors.</p>
+    }
+    @if (_draft.Kind == RendererKind.Svg && _draft.SizingMode == SvgQRCode.SizingMode.ViewBoxAttribute)
+    {
+        <p class="help">ViewBox-only SVG is responsive. The renderer uses module coordinates, so fixed scale and dimensions do not apply.</p>
+    }
+    @if (IsMicro) { <p class="help">ArtQRCode is unavailable for Micro QR because it assumes three standard finder patterns.</p> }
+    @if (_draft.HasLogo)
+    {
+        <ImageUpload @key="_draft.Kind" Label="Center logo" HasImage="@(_draft.Logo is not null)" Changed="@(e => ImageChanged("logo", e))" />
+    }
+    @if (_draft.Kind == RendererKind.Art)
+    {
+        <ImageUpload Label="Background image" HasImage="@(_draft.BackgroundImage is not null)" Changed="@(e => ImageChanged("background", e))" />
+        <ImageUpload Label="Finder-pattern image" HasImage="@(_draft.FinderPatternImage is not null)" Changed="@(e => ImageChanged("finder", e))" />
+    }
+</fieldset>
+<p class="notice">Keep strong contrast and quiet zones for reliable scanning. Logos, artwork, transparency, and Micro QR can reduce compatibility. Preview is not scanner validation.</p>
+
+@code {
+    [Parameter, EditorRequired] public RendererOptions Options { get; set; } = default!;
+    [Parameter] public bool IsMicro { get; set; }
+    [Parameter] public EventCallback<OptionsChange<RendererOptions>> Changed { get; set; }
+    private RendererOptions? _last;
+    private RendererOptions _draft = new();
+    private PayloadValues _values = new();
+    private bool _uploading;
+    private string? _uploadError;
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(_last, Options))
+        {
+            if (_last is not null && _last.Kind != Options.Kind) { _uploading = false; _uploadError = null; }
+            _last = Options;
+            _draft = Options;
+            _values = RendererFieldCatalog.ToValues(Options);
+        }
+    }
+
+    private async Task Edit(FieldEdit edit)
+    {
+        _values[edit.Key] = edit.Value;
+        if (edit.Key == "Kind") _uploadError = null;
+        await Publish(edit.Immediate);
+    }
+
+    private async Task Publish(bool immediate)
+    {
+        try
+        {
+            _draft = RendererFieldCatalog.Parse(_values, _draft, IsMicro);
+            await Changed.InvokeAsync(new(_draft, _uploadError, immediate));
+        }
+        catch (ArgumentException ex)
+        {
+            await Changed.InvokeAsync(new(null, ex.Message, immediate));
+        }
+    }
+
+    private async Task ImageChanged(string role, ImageEdit edit)
+    {
+        _uploading = edit.Busy;
+        _uploadError = edit.Error;
+        if (edit.Busy)
+        {
+            await Changed.InvokeAsync(new(null, "Reading image…", true));
+            return;
+        }
+        _draft = role switch
+        {
+            "logo" => _draft with { Logo = edit.Bytes },
+            "background" => _draft with { BackgroundImage = edit.Bytes },
+            _ => _draft with { FinderPatternImage = edit.Bytes }
+        };
+        await Publish(true);
+    }
+}

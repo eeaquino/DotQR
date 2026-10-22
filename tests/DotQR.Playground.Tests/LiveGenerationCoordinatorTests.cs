@@ -25,6 +25,19 @@ public sealed class LiveGenerationCoordinatorTests
     }
 
     [Fact]
+    public async Task InvalidEditorValueInvalidatesPendingRender()
+    {
+        var pending = new TaskCompletionSource<GenerationOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using var coordinator = new LiveGenerationCoordinator((_, _) => pending.Task, TimeProvider.System);
+        var task = coordinator.SubmitAsync(QrGenerationServiceTests.Request(), true);
+        coordinator.Reject("Scale must be a number");
+        pending.SetResult(new(null, "old result"));
+        await task;
+        Assert.Equal("Scale must be a number", coordinator.Current!.Error);
+        Assert.False(coordinator.IsBusy);
+    }
+
+    [Fact]
     public async Task SubmissionInvalidatesCurrentOutputImmediately()
     {
         var clock = new ManualTimeProvider();
